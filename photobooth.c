@@ -1,6 +1,6 @@
 /*
  * To compile, use this command (those are backticks, not single quotes):
- * gcc -Wall -g -o photobooth main.c -export-dynamic `pkg-config gtk+-2.0 libglade-2.0 --cflags --libs`
+ * gcc -Wall -g -o photobooth photobooth.c -export-dynamic `pkg-config gtk+-2.0 libglade-2.0 --cflags --libs`
  */
 
 #include <gtk/gtk.h>
