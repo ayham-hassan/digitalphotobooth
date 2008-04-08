@@ -1,0 +1,114 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include "frame.h"
+#include "drv-v4l2.h"
+#include <linux/videodev.h>
+#include "cam.h"
+#include "../jpeg-6b/jpeglib.h"
+
+/* Write a Video4Linux2 frame to a JPEG image.
+ *  frame - A pointer to the Video4Linux2 frame struct
+ *  filename - C string specifying filename to save to
+ *  quality - integer in the range [0, 100] specifying JPEG quality parameter
+ *  @return 0 if the process was successful, nonzero if unsuccessful
+ */
+int write_jpg(VidFrame *frame, char *filename, int quality){
+  struct jpeg_compress_struct cinfo;
+  struct jpeg_error_mgr jerr;
+
+  FILE *outFile;
+  JSAMPROW row_pointer[1];
+  int rowStride;
+  JSAMPLE *imageData;
+
+  //First we need to convert the frame to RGB
+  //Find the input format
+  fourcc_t inputFormat = vidFrameGetFormat(frame);
+  //output format (24-bit RGB)
+  fourcc_t outputFormat = V4L2_PIX_FMT_RGB24;
+  //converter object
+  VidConv *converter = vidConvFind(inputFormat, outputFormat);
+  printf("-1\n");
+  //new rgb frame
+  VidFrame *rgbFrame = vidFrameCreate();
+  //do conversion
+  if( !converter ){
+    fprintf(stderr, "Couldn't find a valid converter.\n");
+    exit(1);
+  } else {
+    if( vidConvProcess(converter, frame, rgbFrame) ){
+      fprintf(stderr, "Error while converting frame format.\n");
+      exit(1);
+    }
+  }
+
+  imageData = (JSAMPLE *) vidFrameGetImageData(rgbFrame);
+
+  cinfo.err = jpeg_std_error(&jerr);
+    
+  jpeg_create_compress(&cinfo);
+
+  if( (outFile = fopen(filename, "wb")) == NULL ){
+    fprintf(stderr, "Can't create file %s. \n", filename);
+    return(1);
+  }
+  jpeg_stdio_dest(&cinfo, outFile);
+
+  cinfo.image_width = rgbFrame->size.width;
+  cinfo.image_height = rgbFrame->size.height;
+  cinfo.input_components = 3;
+  cinfo.in_color_space = JCS_RGB;
+
+  jpeg_set_defaults(&cinfo);
+  jpeg_set_quality(&cinfo, 90, TRUE);
+  jpeg_start_compress(&cinfo, TRUE);
+
+  //rowStride = cinfo.image_width;
+  rowStride = vidFrameGetRowStride(rgbFrame);
+  while(cinfo.next_scanline < cinfo.image_height){
+    row_pointer[0] = &imageData[cinfo.next_scanline * rowStride];
+    (void) jpeg_write_scanlines(&cinfo, row_pointer, 1);
+  }
+
+  jpeg_finish_compress(&cinfo);
+  fclose(outFile);
+  jpeg_destroy_compress(&cinfo);
+
+  return 0;
+
+}
+
+
+/* Using a Video4Linux2 capture object, write a high-resolution JPEG image.
+ * Image size is defined in cam.h, HR_WIDTH and HR_HEIGHT
+ *  capture - A pointer to the Video4Linux capture object. This object should
+ *            not currently be in a streaming state.
+ *  filename - C string specifying filename to save to
+ *  quality - integer in the range [0, 100] specifying JPEG quality parameter
+ *  @return 0 if the process was successful, nonzero otherwise
+ */
+int capture_hr_jpg(V4L2Capture *capture, VidSize *lowRes, char *fileName, 
+                   int quality){
+  int retVal = 0, counter = 0;
+  VidSize highResolution;
+
+  highResolution.width = HR_WIDTH;
+  highResolution.height = HR_HEIGHT;
+  v4l2CaptureSetResolution(capture, &highResolution);
+    
+  v4l2CaptureStartStreaming(capture, 0, 4);
+
+  //It takes a few frames for the camera to equalize color and brightness
+  VidFrame *highFrame = v4l2CaptureQueryFrame(capture);
+  for(counter = 0; counter < 50; counter++){
+    highFrame = v4l2CaptureQueryFrame(capture);
+  }
+
+  //Using jpeglib
+  retVal = write_jpg(highFrame, fileName, 85);
+
+  v4l2CaptureStopStreaming(capture);
+  v4l2CaptureSetResolution(capture, lowRes);
+
+  return retVal;
+}
