@@ -7,6 +7,17 @@
 //Define the image size for high-resolution image capture
 #define HR_WIDTH 1600
 #define HR_HEIGHT 1200
+/* Raw image format supported by QuickCam Pro 9000
+ * This code is defined in fourcc.c
+ */
+#define YUYV 0x56595559
+/* Low resolution video should be 640x480 */
+#define LR_WIDTH  640
+#define LR_HEIGHT 480
+
+/* Initializes the camera and returns a V4L2Capture pointer
+ */
+V4L2Capture *open_camera();
 
 /* Write a Video4Linux2 frame to a JPEG image.
  *  frame - A pointer to the Video4Linux2 frame struct
