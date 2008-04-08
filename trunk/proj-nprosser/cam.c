@@ -18,6 +18,14 @@ V4L2Capture *open_camera(){
   return capture;
 }
 
+/* Closes the video stream and releases resources
+ *  capture - A pointer to the Video4Linux capture object
+ */
+void close_camera(V4L2Capture *capture){
+  v4l2CaptureStopStreaming(capture);
+  v4l2CaptureRelease(&capture);
+}
+
 /* Write a Video4Linux2 frame to a JPEG image.
  *  frame - A pointer to the Video4Linux2 frame struct
  *  filename - C string specifying filename to save to
