@@ -18,7 +18,6 @@ typedef struct
     gint timer_left;
     gint timer_total;
     gint timer_id;
-    gboolean window_fullscreen;
     gint money_inserted;
     gint money_total;
     gchar money_str[255];
@@ -122,9 +121,6 @@ gboolean init_app (DigitalPhotoBooth *booth)
     booth->take_photo_progress = GTK_WIDGET (gtk_builder_get_object (builder, "take_photo_progress"));
     booth->money_forward_button = GTK_WIDGET (gtk_builder_get_object (builder, "money_forward_button"));
     
-    /* initialize fullscreen boolean */
-    booth->window_fullscreen = FALSE;
-
     /* setup money handler variables */
     booth->money_total = 4;
     booth->money_inserted = 0;
@@ -218,16 +214,11 @@ gboolean on_window_key_press_event (GtkWidget *window, GdkEventKey *event, Digit
 {
     if (event->keyval == 102 || event->keyval == 70)
     {
-        if (booth->window_fullscreen == FALSE)
-        {
-            gtk_window_fullscreen ((GtkWindow*)booth->window);
-            booth->window_fullscreen = TRUE;
-        }
-        else
-        {
-            gtk_window_unfullscreen ((GtkWindow*)booth->window);
-            booth->window_fullscreen = FALSE;
-        }
+        gtk_window_fullscreen ((GtkWindow*)booth->window);
+    }
+    else if (event->keyval == 71 || event->keyval == 103 )
+    {
+        gtk_window_unfullscreen ((GtkWindow*)booth->window);
     }
     else if (event->keyval == 67 || event->keyval == 99)
     {
