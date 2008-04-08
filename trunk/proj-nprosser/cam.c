@@ -6,6 +6,18 @@
 #include "cam.h"
 #include "jpeglib.h"
 
+/* Initializes the camera and returns a V4L2Capture pointer
+ */
+V4L2Capture *open_camera(){
+  V4L2Capture *capture = v4l2CaptureOpen("/dev/video0");
+  VidSize _resolution;
+  _resolution.width = LR_WIDTH;
+  _resolution.height = LR_HEIGHT;
+  v4l2CaptureSetImageFormat(capture, (fourcc_t)YUYV, &_resolution);
+
+  return capture;
+}
+
 /* Write a Video4Linux2 frame to a JPEG image.
  *  frame - A pointer to the Video4Linux2 frame struct
  *  filename - C string specifying filename to save to
