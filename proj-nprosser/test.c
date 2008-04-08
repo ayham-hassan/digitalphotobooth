@@ -16,8 +16,7 @@ int main(){
     return 1;
   }
 
-  v4l2CaptureStopStreaming(capture);
-  v4l2CaptureRelease(&capture);
+  close_camera(capture);
 
   return 0;
 }
