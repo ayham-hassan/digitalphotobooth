@@ -1,0 +1,21 @@
+CC=gcc
+CFLAGS=-c -Wall $(shell pkg-config gtk+-2.0 libglade-2.0 --cflags)
+LDFLAGS=-O2 -export-dynamic $(shell pkg-config gtk+-2.0 libglade-2.0 --libs)
+SOURCES=proj-nprosser/cam.c proj-nprosser/drv-v4l2.c proj-nprosser/frame.c proj-nprosser/yuv2rgb.c proj-nprosser/fourcc.c proj-nprosser/utils.c photobooth.c
+INCLUDE=/usr/lib/libjpeg.a
+OBJECTS=$(SOURCES:.c=.o)
+EXECUTABLE=photobooth
+
+all: $(SOURCES) $(EXECUTABLE)
+	
+$(EXECUTABLE): $(OBJECTS) $(INCLUDE)
+	$(CC) $(LDFLAGS) $(OBJECTS) $(INCLUDE) -o $@
+
+.c.o:
+	$(CC) $(CFLAGS) $< -o $@
+
+clean:
+	rm *.o
+
+realclean: clean
+	rm $(EXECUTABLE)

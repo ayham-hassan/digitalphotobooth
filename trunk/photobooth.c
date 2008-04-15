@@ -3,49 +3,12 @@
  * gcc -Wall -g -o photobooth photobooth.c -export-dynamic `pkg-config gtk+-2.0 libglade-2.0 --cflags --libs`
  */
 
+#include <string.h>
 #include <gtk/gtk.h>
-
-/* location of UI XML file relative to path in which program is running */
-#define BUILDER_XML_FILE "photobooth.xml"
-
-typedef struct
-{
-    GtkWidget *window;
-    GtkWidget *wizard_panel;
-    GtkWidget *take_photo_progress;
-    GtkWidget *money_message_label;
-    GtkWidget *money_forward_button;
-    gint timer_left;
-    gint timer_total;
-    gint timer_id;
-    gint money_inserted;
-    gint money_total;
-    gchar money_str[255];
-} DigitalPhotoBooth;
-
-/* window callback prototypes */
-void on_window_destroy (GtkObject *object, DigitalPhotoBooth *booth);
-
-/* button callback prototypes */
-void on_forward_button_clicked (GtkWidget *button, DigitalPhotoBooth *booth);
-void on_back_button_clicked (GtkWidget *button, DigitalPhotoBooth *booth);
-void on_money_forward_button_clicked (GtkWidget *button, DigitalPhotoBooth *booth);
-void on_take_photo_button_clicked (GtkWidget *button, DigitalPhotoBooth *booth);
-
-/* keyboard event callback prototypes */
-gboolean on_window_key_press_event (GtkWidget *window, GdkEventKey *event, DigitalPhotoBooth *booth);
-
-/* countdown timer prototypes */
-void timer_start (DigitalPhotoBooth *booth);
-gboolean timer_process (DigitalPhotoBooth *booth);
-
-/* money handling functions */
-void money_insert (DigitalPhotoBooth *booth);
-void money_update (DigitalPhotoBooth *booth);
-
-/* misc. function prototypes */
-void error_message (const gchar *message);
-gboolean init_app (DigitalPhotoBooth *booth);
+#include <gdk/gdk.h>
+#include "photobooth.h"
+#include "proj-nprosser/frame.h"
+#include "proj-nprosser/cam.h"
 
 int main (int argc, char *argv[])
 {
@@ -120,13 +83,19 @@ gboolean init_app (DigitalPhotoBooth *booth)
     booth->money_message_label = GTK_WIDGET (gtk_builder_get_object (builder, "money_message_label"));
     booth->take_photo_progress = GTK_WIDGET (gtk_builder_get_object (builder, "take_photo_progress"));
     booth->money_forward_button = GTK_WIDGET (gtk_builder_get_object (builder, "money_forward_button"));
+    booth->videobox1 = GTK_WIDGET (gtk_builder_get_object (builder, "videobox1"));
+    booth->videobox2 = GTK_WIDGET (gtk_builder_get_object (builder, "videobox2"));
+    booth->videobox = NULL;
     
     /* setup money handler variables */
     booth->money_total = 4;
     booth->money_inserted = 0;
     money_update(booth);
     
-    /* connect signals, passing our TutorialTextEditor struct as user data */
+    /* setup the capture pointer to NULL */
+    booth->capture = NULL;
+    
+    /* connect signals, passing our DigitalPhotoBooth struct as user data */
     gtk_builder_connect_signals (builder, booth);
                 
     /* free memory used by GtkBuilder object */
@@ -142,27 +111,53 @@ as the handler in Glade!
 */
 void on_window_destroy (GtkObject *object, DigitalPhotoBooth *booth)
 {
+    if (booth->capture != NULL)
+    {
+        close_camera (booth->capture);
+    }
+    
     gtk_main_quit();
-}
-
-void on_forward_button_clicked (GtkWidget *button, DigitalPhotoBooth *booth)
-{
-    gtk_notebook_next_page ((GtkNotebook*)booth->wizard_panel);
-}
-
-void on_back_button_clicked (GtkWidget *button, DigitalPhotoBooth *booth)
-{
-    gtk_notebook_prev_page ((GtkNotebook*)booth->wizard_panel);
 }
 
 void on_money_forward_button_clicked (GtkWidget *button, DigitalPhotoBooth *booth)
 {
     gtk_notebook_next_page ((GtkNotebook*)booth->wizard_panel);
+    
+    if (booth->capture == NULL)
+    {
+        booth->capture = open_camera();
+    }
+    
+    booth->videobox = booth->videobox1;
+	
+	booth->frame = getFrame (booth->capture);
+	vidFrameRef (booth->frame);
+
+    gdk_draw_rgb_image (booth->videobox->window, booth->videobox->style->white_gc, 0, 0, 640, 480, GDK_RGB_DITHER_NONE, vidFrameGetImageData(booth->frame), 3 * 640);
+    
+    vidFrameUnref (&booth->frame);
+            
+    booth->stream_time_id = gtk_timeout_add (200, (GtkFunction) camera_process, booth);
+}
+
+gboolean camera_process (DigitalPhotoBooth *booth)
+{
+    booth->frame = getFrame (booth->capture);
+    vidFrameRef (booth->frame);
+    
+    gdk_draw_rgb_image (booth->videobox->window, booth->videobox->style->white_gc, 0, 0, 640, 480, GDK_RGB_DITHER_NONE, vidFrameGetImageData(booth->frame), 3 * 640);
+    
+    vidFrameUnref (&booth->frame);
+    
+    return TRUE;
 }
 
 void on_take_photo_button_clicked (GtkWidget *button, DigitalPhotoBooth *booth)
 {
     gtk_notebook_next_page ((GtkNotebook*)booth->wizard_panel);
+    
+    booth->videobox = booth->videobox2;
+
     timer_start(booth);
 }
 
@@ -187,6 +182,7 @@ gboolean timer_process (DigitalPhotoBooth *booth)
     {
         gtk_timeout_remove(booth->timer_id);
         gtk_notebook_prev_page((GtkNotebook*)booth->wizard_panel);
+        booth->videobox = booth->videobox1;
         return FALSE;
     }
 }
