@@ -16,3 +16,4 @@ int rvtk_log(RvtkLogLevel level,const char *format,...){
 	
 	return n;
 }
+
