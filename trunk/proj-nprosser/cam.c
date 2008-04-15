@@ -14,6 +14,7 @@ V4L2Capture *open_camera(){
   _resolution.width = LR_WIDTH;
   _resolution.height = LR_HEIGHT;
   v4l2CaptureSetImageFormat(capture, (fourcc_t)YUYV, &_resolution);
+  v4l2CaptureStartStreaming(capture,0,4);
 
   return capture;
 }
