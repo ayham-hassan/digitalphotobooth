@@ -24,6 +24,12 @@ V4L2Capture *open_camera();
  */
 void close_camera(V4L2Capture *capture);
 
+/* Capture a single frame from the video stream. This frame is in RGB24 format.
+ *  capture - A pointer to the Video4Linux capture object
+ *  @return a VidFrame object with data in RGB24 format
+ */
+VidFrame *getFrame(V4L2Capture *capture);
+
 /* Write a Video4Linux2 frame to a JPEG image.
  *  frame - A pointer to the Video4Linux2 frame struct
  *  filename - C string specifying filename to save to
