@@ -26,6 +26,36 @@ void close_camera(V4L2Capture *capture){
   v4l2CaptureRelease(&capture);
 }
 
+/* Capture a single frame from the video stream. This frame is in RGB24 format.
+ *  capture - A pointer to the Video4Linux capture object
+ *  @return a VidFrame object with data in RGB24 format
+ */
+VidFrame *getFrame(V4L2Capture *capture){
+  //capture frame
+  VidFrame *myFrame = v4l2CaptureQueryFrame(capture);
+  //Convert the frame to RGB:
+  //Find the input format
+  fourcc_t inputFormat = vidFrameGetFormat(myFrame);
+  //output format (24-bit RGB)
+  fourcc_t outputFormat = V4L2_PIX_FMT_RGB24;
+  //converter object
+  VidConv *converter = vidConvFind(inputFormat, outputFormat);
+  //new rgb frame
+  VidFrame *rgbFrame = vidFrameCreate();
+  //do conversion
+  if( !converter ){
+    fprintf(stderr, "Couldn't find a valid converter.\n");
+    exit(1);
+  } else {
+    if( vidConvProcess(converter, myFrame, rgbFrame) ){
+      fprintf(stderr, "Error while converting frame format.\n");
+      exit(1);
+    }
+  }
+
+  return rgbFrame;
+}
+
 /* Write a Video4Linux2 frame to a JPEG image.
  *  frame - A pointer to the Video4Linux2 frame struct
  *  filename - C string specifying filename to save to
@@ -46,19 +76,26 @@ int write_jpg(VidFrame *frame, char *filename, int quality){
   fourcc_t inputFormat = vidFrameGetFormat(frame);
   //output format (24-bit RGB)
   fourcc_t outputFormat = V4L2_PIX_FMT_RGB24;
-  //converter object
-  VidConv *converter = vidConvFind(inputFormat, outputFormat);
-  //new rgb frame
-  VidFrame *rgbFrame = vidFrameCreate();
-  //do conversion
-  if( !converter ){
-    fprintf(stderr, "Couldn't find a valid converter.\n");
-    exit(1);
-  } else {
-    if( vidConvProcess(converter, frame, rgbFrame) ){
-      fprintf(stderr, "Error while converting frame format.\n");
+  VidConv *converter;
+  VidFrame *rgbFrame;
+  
+  if( inputFormat != outputFormat ){
+    //converter object
+    converter = vidConvFind(inputFormat, outputFormat);
+    //new rgb frame
+    rgbFrame = vidFrameCreate();
+    //do conversion
+    if( !converter ){
+      fprintf(stderr, "Couldn't find a valid converter.\n");
       exit(1);
+    } else {
+      if( vidConvProcess(converter, frame, rgbFrame) ){
+        fprintf(stderr, "Error while converting frame format.\n");
+        exit(1);
+      }
     }
+  } else { //input format is already rgb24
+    rgbFrame = frame;
   }
 
   imageData = (JSAMPLE *) vidFrameGetImageData(rgbFrame);
