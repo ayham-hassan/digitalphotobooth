@@ -3,9 +3,7 @@
  * gcc -Wall -g -o photobooth photobooth.c -export-dynamic `pkg-config gtk+-2.0 libglade-2.0 --cflags --libs`
  */
 
-#include <string.h>
 #include <gtk/gtk.h>
-#include <gdk/gdk.h>
 #include "photobooth.h"
 #include "proj-nprosser/frame.h"
 #include "proj-nprosser/cam.h"
@@ -85,15 +83,15 @@ gboolean init_app (DigitalPhotoBooth *booth)
     booth->money_forward_button = GTK_WIDGET (gtk_builder_get_object (builder, "money_forward_button"));
     booth->videobox1 = GTK_WIDGET (gtk_builder_get_object (builder, "videobox1"));
     booth->videobox2 = GTK_WIDGET (gtk_builder_get_object (builder, "videobox2"));
-    booth->videobox = NULL;
     
     /* setup money handler variables */
     booth->money_total = 4;
     booth->money_inserted = 0;
     money_update(booth);
     
-    /* setup the capture pointer to NULL */
+    /* set the streaming video pointers to NULL */
     booth->capture = NULL;
+    booth->videobox = NULL;
     
     /* connect signals, passing our DigitalPhotoBooth struct as user data */
     gtk_builder_connect_signals (builder, booth);
@@ -111,6 +109,7 @@ as the handler in Glade!
 */
 void on_window_destroy (GtkObject *object, DigitalPhotoBooth *booth)
 {
+    /* check if camera was open already and close if necessary */
     if (booth->capture != NULL)
     {
         close_camera (booth->capture);
@@ -123,30 +122,43 @@ void on_money_forward_button_clicked (GtkWidget *button, DigitalPhotoBooth *boot
 {
     gtk_notebook_next_page ((GtkNotebook*)booth->wizard_panel);
     
+    /* make sure camera is not already open and open if necessary */
     if (booth->capture == NULL)
     {
         booth->capture = open_camera();
     }
     
+    /* point to the current drawing area */
     booth->videobox = booth->videobox1;
 	
+	/* get the current frame */
 	booth->frame = getFrame (booth->capture);
 	vidFrameRef (booth->frame);
 
-    gdk_draw_rgb_image (booth->videobox->window, booth->videobox->style->white_gc, 0, 0, 640, 480, GDK_RGB_DITHER_NONE, vidFrameGetImageData(booth->frame), 3 * 640);
+    /* draw the current frame on the drawing area */
+    gdk_draw_rgb_image (booth->videobox->window, booth->videobox->style->white_gc,
+                        0, 0, 640, 480, GDK_RGB_DITHER_NONE,
+                        vidFrameGetImageData(booth->frame), 3 * 640);
     
+    /* frame reference no longer necessary */
     vidFrameUnref (&booth->frame);
-            
-    booth->stream_time_id = gtk_timeout_add (200, (GtkFunction) camera_process, booth);
+    
+    /* start a timeout which updates the drawing area */
+    booth->video_timeout_id = gtk_timeout_add (200, (GtkFunction) camera_process, booth);
 }
 
 gboolean camera_process (DigitalPhotoBooth *booth)
 {
-    booth->frame = getFrame (booth->capture);
-    vidFrameRef (booth->frame);
+    /* get the current frame */
+	booth->frame = getFrame (booth->capture);
+	vidFrameRef (booth->frame);
+
+    /* draw the current frame on the drawing area */
+    gdk_draw_rgb_image (booth->videobox->window, booth->videobox->style->white_gc,
+                        0, 0, 640, 480, GDK_RGB_DITHER_NONE,
+                        vidFrameGetImageData(booth->frame), 3 * 640);
     
-    gdk_draw_rgb_image (booth->videobox->window, booth->videobox->style->white_gc, 0, 0, 640, 480, GDK_RGB_DITHER_NONE, vidFrameGetImageData(booth->frame), 3 * 640);
-    
+    /* frame reference no longer necessary */
     vidFrameUnref (&booth->frame);
     
     return TRUE;
@@ -156,8 +168,10 @@ void on_take_photo_button_clicked (GtkWidget *button, DigitalPhotoBooth *booth)
 {
     gtk_notebook_next_page ((GtkNotebook*)booth->wizard_panel);
     
+    /* point to the current drawing area */
     booth->videobox = booth->videobox2;
 
+    /* start the countdown timer */
     timer_start(booth);
 }
 
@@ -182,7 +196,10 @@ gboolean timer_process (DigitalPhotoBooth *booth)
     {
         gtk_timeout_remove(booth->timer_id);
         gtk_notebook_prev_page((GtkNotebook*)booth->wizard_panel);
+        
+        /* point to the current drawing area */
         booth->videobox = booth->videobox1;
+
         return FALSE;
     }
 }

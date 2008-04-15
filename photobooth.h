@@ -10,25 +10,30 @@
 
 typedef struct
 {
+    /* main window */
     GtkWidget *window;
+    
+    /* wizard panel */
     GtkWidget *wizard_panel;
-    GtkWidget *take_photo_progress;
+    
+    /* first panel - welcome and coin acceptance */
     GtkWidget *money_message_label;
     GtkWidget *money_forward_button;
-    GtkWidget *videobox;
-    GtkWidget *videobox1;
-    GtkWidget *videobox2;
-    GtkWidget *image;
-    VidFrame *frame;
-    GdkPixmap *pixmap;
-    V4L2Capture *capture;
-    gint timer_left;
-    gint timer_total;
-    gint timer_id;
-    gint stream_time_id;
     gint money_inserted;
     gint money_total;
     gchar money_str[255];
+    
+    /* second and third panel - streaming video */
+    V4L2Capture *capture;
+    VidFrame *frame;
+    gint video_timeout_id;
+    GtkWidget *videobox;
+    GtkWidget *videobox1;
+    GtkWidget *take_photo_progress;
+    GtkWidget *videobox2;
+    gint timer_left;
+    gint timer_total;
+    gint timer_id;
 } DigitalPhotoBooth;
 
 /* window callback prototypes */
@@ -45,6 +50,7 @@ gboolean on_window_key_press_event (GtkWidget *window, GdkEventKey *event, Digit
 void timer_start (DigitalPhotoBooth *booth);
 gboolean timer_process (DigitalPhotoBooth *booth);
 
+/* camera update methods */
 gboolean camera_process (DigitalPhotoBooth *booth);
 
 /* money handling functions */
