@@ -10,12 +10,17 @@ all: $(SOURCES) $(EXECUTABLE)
 	
 $(EXECUTABLE): $(OBJECTS) $(INCLUDE)
 	$(CC) $(LDFLAGS) $(OBJECTS) $(INCLUDE) -o $@
+	sed '/response_id/d' photobooth.glade > photobooth2.glade
+	gtk-builder-convert photobooth2.glade photobooth.xml
+	rm photobooth2.glade
 
 .c.o:
 	$(CC) $(CFLAGS) $< -o $@
 
 clean:
 	rm *.o
+	rm proj-nprosser/*.o
 
 realclean: clean
 	rm $(EXECUTABLE)
+	rm photobooth.xml
