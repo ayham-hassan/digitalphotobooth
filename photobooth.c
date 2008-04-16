@@ -93,7 +93,8 @@ gboolean init_app (DigitalPhotoBooth *booth)
     booth->capture = NULL;
     booth->videobox = NULL;
     
-    booth->video_timeout_id = -1;
+    booth->video_source_id = 0;
+	booth->timer_source_id = 0;
     
     /* connect signals, passing our DigitalPhotoBooth struct as user data */
     gtk_builder_connect_signals (builder, booth);
@@ -111,10 +112,10 @@ as the handler in Glade!
 */
 void on_window_destroy (GtkObject *object, DigitalPhotoBooth *booth)
 {
-    if (booth->video_timeout_id != -1)
+    if (booth->video_source_id != 0)
     {
-        gtk_timeout_remove(booth->video_timeout_id);
-        booth->video_timeout_id = -1;
+        g_source_remove(booth->video_source_id);
+        booth->video_source_id = 0;
     }
     
     /* check if camera was open already and close if necessary */
@@ -151,7 +152,7 @@ void on_money_forward_button_clicked (GtkWidget *button, DigitalPhotoBooth *boot
     vidFrameRelease (&booth->frame);
     
     /* start a timeout which updates the drawing area */
-    booth->video_timeout_id = gtk_timeout_add (1000/FPS*4, (GtkFunction) camera_process, booth);
+    booth->video_source_id = g_idle_add ((GSourceFunc)camera_process, booth);
 }
 
 gboolean camera_process (DigitalPhotoBooth *booth)
@@ -186,7 +187,7 @@ void timer_start (DigitalPhotoBooth *booth)
     booth->timer_left = 4;
     booth->timer_total = 5;
     gtk_progress_bar_set_fraction ((GtkProgressBar*)booth->take_photo_progress, 1.0 );
-    booth->timer_id = gtk_timeout_add (1000, (GtkFunction) timer_process, booth);
+    booth->timer_source_id = g_timeout_add_seconds (1, (GSourceFunc)timer_process, booth);
 }
 
 gboolean timer_process (DigitalPhotoBooth *booth)
@@ -200,7 +201,6 @@ gboolean timer_process (DigitalPhotoBooth *booth)
     }
     else
     {
-        gtk_timeout_remove(booth->timer_id);
         gtk_notebook_prev_page((GtkNotebook*)booth->wizard_panel);
         
         /* point to the current drawing area */
