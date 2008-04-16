@@ -26,14 +26,14 @@ typedef struct
     /* second and third panel - streaming video */
     V4L2Capture *capture;
     VidFrame *frame;
-    gint video_timeout_id;
+    guint video_source_id;
     GtkWidget *videobox;
     GtkWidget *videobox1;
     GtkWidget *take_photo_progress;
     GtkWidget *videobox2;
     gint timer_left;
     gint timer_total;
-    gint timer_id;
+    guint timer_source_id;
 } DigitalPhotoBooth;
 
 /* window callback prototypes */
