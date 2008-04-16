@@ -18,9 +18,9 @@ $(EXECUTABLE): $(OBJECTS) $(INCLUDE)
 	$(CC) $(CFLAGS) $< -o $@
 
 clean:
-	rm *.o
-	rm proj-nprosser/*.o
+	rm -f *.o
+	rm -f proj-nprosser/*.o
 
 realclean: clean
-	rm $(EXECUTABLE)
-	rm photobooth.xml
+	rm -f $(EXECUTABLE)
+	rm -f photobooth.xml
