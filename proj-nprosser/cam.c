@@ -35,15 +35,20 @@ void close_camera(V4L2Capture *capture){
 VidFrame *getFrame(V4L2Capture *capture){
   //capture frame
   VidFrame *myFrame = v4l2CaptureQueryFrame(capture);
+  
   //Convert the frame to RGB:
   //Find the input format
   fourcc_t inputFormat = vidFrameGetFormat(myFrame);
+  
   //output format (24-bit RGB)
   fourcc_t outputFormat = V4L2_PIX_FMT_RGB24;
+  
   //converter object
   VidConv *converter = vidConvFind(inputFormat, outputFormat);
+  
   //new rgb frame
   VidFrame *rgbFrame = vidFrameCreate();
+  
   //do conversion
   if( !converter ){
     fprintf(stderr, "Couldn't find a valid converter.\n");
@@ -54,6 +59,9 @@ VidFrame *getFrame(V4L2Capture *capture){
       exit(1);
     }
   }
+  
+  /* clean up my frame */
+  vidFrameUnref (&myFrame);
 
   return rgbFrame;
 }

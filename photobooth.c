@@ -133,7 +133,6 @@ void on_money_forward_button_clicked (GtkWidget *button, DigitalPhotoBooth *boot
 	
 	/* get the current frame */
 	booth->frame = getFrame (booth->capture);
-	vidFrameRef (booth->frame);
 
     /* draw the current frame on the drawing area */
     gdk_draw_rgb_image (booth->videobox->window, booth->videobox->style->white_gc,
@@ -151,7 +150,6 @@ gboolean camera_process (DigitalPhotoBooth *booth)
 {
     /* get the current frame */
 	booth->frame = getFrame (booth->capture);
-	vidFrameRef (booth->frame);
 
     /* draw the current frame on the drawing area */
     gdk_draw_rgb_image (booth->videobox->window, booth->videobox->style->white_gc,
