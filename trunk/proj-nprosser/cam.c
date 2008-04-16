@@ -59,9 +59,6 @@ VidFrame *getFrame(V4L2Capture *capture){
       exit(1);
     }
   }
-  
-  /* clean up my frame */
-  vidFrameUnref (&myFrame);
 
   return rgbFrame;
 }

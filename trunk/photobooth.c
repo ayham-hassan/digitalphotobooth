@@ -148,10 +148,10 @@ void on_money_forward_button_clicked (GtkWidget *button, DigitalPhotoBooth *boot
                         vidFrameGetImageData(booth->frame), 3 * LR_WIDTH);
     
     /* frame reference no longer necessary */
-    vidFrameUnref (&booth->frame);
+    vidFrameRelease (&booth->frame);
     
     /* start a timeout which updates the drawing area */
-    booth->video_timeout_id = gtk_timeout_add (1000/FPS*2, (GtkFunction) camera_process, booth);
+    booth->video_timeout_id = gtk_timeout_add (1000/FPS*4, (GtkFunction) camera_process, booth);
 }
 
 gboolean camera_process (DigitalPhotoBooth *booth)
@@ -165,7 +165,7 @@ gboolean camera_process (DigitalPhotoBooth *booth)
                         vidFrameGetImageData(booth->frame), 3 * LR_WIDTH);
     
     /* frame reference no longer necessary */
-    vidFrameUnref (&booth->frame);
+    vidFrameRelease (&booth->frame);
     
     return TRUE;
 }
