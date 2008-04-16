@@ -137,14 +137,14 @@ void on_money_forward_button_clicked (GtkWidget *button, DigitalPhotoBooth *boot
 
     /* draw the current frame on the drawing area */
     gdk_draw_rgb_image (booth->videobox->window, booth->videobox->style->white_gc,
-                        0, 0, 640, 480, GDK_RGB_DITHER_NONE,
-                        vidFrameGetImageData(booth->frame), 3 * 640);
+                        0, 0, LR_WIDTH, LR_HEIGHT, GDK_RGB_DITHER_NONE,
+                        vidFrameGetImageData(booth->frame), 3 * LR_WIDTH);
     
     /* frame reference no longer necessary */
     vidFrameUnref (&booth->frame);
     
     /* start a timeout which updates the drawing area */
-    booth->video_timeout_id = gtk_timeout_add (200, (GtkFunction) camera_process, booth);
+    booth->video_timeout_id = gtk_timeout_add (1000/FPS, (GtkFunction) camera_process, booth);
 }
 
 gboolean camera_process (DigitalPhotoBooth *booth)
@@ -155,8 +155,8 @@ gboolean camera_process (DigitalPhotoBooth *booth)
 
     /* draw the current frame on the drawing area */
     gdk_draw_rgb_image (booth->videobox->window, booth->videobox->style->white_gc,
-                        0, 0, 640, 480, GDK_RGB_DITHER_NONE,
-                        vidFrameGetImageData(booth->frame), 3 * 640);
+                        0, 0, LR_WIDTH, LR_HEIGHT, GDK_RGB_DITHER_NONE,
+                        vidFrameGetImageData(booth->frame), 3 * LR_WIDTH);
     
     /* frame reference no longer necessary */
     vidFrameUnref (&booth->frame);
@@ -219,7 +219,7 @@ void money_update (DigitalPhotoBooth *booth)
         gtk_widget_set_sensitive (booth->money_forward_button, TRUE);
     }
     
-    sprintf (booth->money_str, "%d Coins Inserted\nPlease insert %d more coins to continue", booth->money_inserted, remaining);
+    sprintf (booth->money_str, "%d Quarters Inserted\nPlease insert %d more quarters to continue", booth->money_inserted, remaining);
     gtk_label_set_text ((GtkLabel*)booth->money_message_label, booth->money_str);
 }
 
