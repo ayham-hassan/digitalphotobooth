@@ -151,7 +151,7 @@ void on_money_forward_button_clicked (GtkWidget *button, DigitalPhotoBooth *boot
     vidFrameUnref (&booth->frame);
     
     /* start a timeout which updates the drawing area */
-    booth->video_timeout_id = gtk_timeout_add (1000/FPS*4, (GtkFunction) camera_process, booth);
+    booth->video_timeout_id = gtk_timeout_add (1000/FPS*2, (GtkFunction) camera_process, booth);
 }
 
 gboolean camera_process (DigitalPhotoBooth *booth)
