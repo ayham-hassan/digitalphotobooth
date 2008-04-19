@@ -15,7 +15,7 @@ V4L2Capture *open_camera(){
   _resolution.height = LR_HEIGHT;
   v4l2CaptureSetImageFormat(capture, (fourcc_t)YUYV, &_resolution);
   v4l2CaptureSetFPS(capture, FPS);
-  v4l2CaptureStartStreaming(capture,0,4);
+  //v4l2CaptureStartStreaming(capture,0,4);
 
   return capture;
 }
@@ -155,10 +155,12 @@ int capture_hr_jpg(V4L2Capture *capture, VidSize *lowRes, char *fileName,
   int retVal = 0, counter = 0;
   VidSize highResolution;
 
+  //v4l2CaptureStopStreaming(capture);
+
   highResolution.width = HR_WIDTH;
   highResolution.height = HR_HEIGHT;
   v4l2CaptureSetResolution(capture, &highResolution);
-    
+
   v4l2CaptureStartStreaming(capture, 0, 4);
 
   //It takes a few frames for the camera to equalize color and brightness
@@ -172,6 +174,7 @@ int capture_hr_jpg(V4L2Capture *capture, VidSize *lowRes, char *fileName,
 
   v4l2CaptureStopStreaming(capture);
   v4l2CaptureSetResolution(capture, lowRes);
+  //v4l2CaptureStartStreaming(capture, 0, 4);
 
   return retVal;
 }
