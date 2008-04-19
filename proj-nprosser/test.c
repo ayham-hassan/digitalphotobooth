@@ -8,7 +8,7 @@ int main(){
 
   v4l2CaptureGetResolution(capture, &resolution);
   printf("Resolution is %dx%d \n", resolution.width, resolution.height);
-  v4l2CaptureSetFPS(capture, 30);
+  //v4l2CaptureSetFPS(capture, 30);
   printf("Frame Rate is %f \n", v4l2CaptureGetFPS(capture));
 
   if( capture_hr_jpg(capture, &resolution, "testImg.jpg", 85) ){
