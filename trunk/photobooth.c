@@ -177,28 +177,22 @@ gboolean camera_process (DigitalPhotoBooth *booth)
 
 gboolean take_photo_process (DigitalPhotoBooth *booth)
 {
-    if (booth->video_source_id != 0)
-        {
-            g_source_remove(booth->video_source_id);
-            booth->video_source_id = 0;
-        }
+    if (booth->capture != NULL)
+    {
+        v4l2CaptureStopStreaming (booth->capture);
+
+        VidSize resolution;
+        v4l2CaptureGetResolution(booth->capture, &resolution);
+        capture_hr_jpg (booth->capture, &resolution, "testImg.jpg", 85);
+
+        v4l2CaptureStartStreaming (booth->capture, 0, 4);
+    }
     
-        if (booth->capture != NULL)
-        {
-            v4l2CaptureStopStreaming (booth->capture);
+    /* start a timeout which updates the drawing area */
+    booth->video_source_id = g_idle_add ((GSourceFunc)camera_process, booth);
 
-            VidSize resolution;
-            v4l2CaptureGetResolution(booth->capture, &resolution);
-            capture_hr_jpg (booth->capture, &resolution, "testImg.jpg", 85);
-
-            v4l2CaptureStartStreaming (booth->capture, 0, 4);
-        }
-        
-        /* start a timeout which updates the drawing area */
-        booth->video_source_id = g_idle_add ((GSourceFunc)camera_process, booth);
-
-        gtk_widget_show (booth->take_photo_button);
-        gtk_widget_hide (booth->take_photo_progress);
+    gtk_widget_show (booth->take_photo_button);
+    gtk_widget_hide (booth->take_photo_progress);
 
     return FALSE;
 }
@@ -233,6 +227,12 @@ gboolean timer_process (DigitalPhotoBooth *booth)
     else
     {
         //gtk_notebook_prev_page((GtkNotebook*)booth->wizard_panel);
+        
+        if (booth->video_source_id != 0)
+        {
+            g_source_remove(booth->video_source_id);
+            booth->video_source_id = 0;
+        }
       
         g_idle_add ((GSourceFunc)take_photo_process, booth);
 
