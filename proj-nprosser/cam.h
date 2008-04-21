@@ -14,7 +14,7 @@
 /* Low resolution video should be 640x480 */
 #define LR_WIDTH  640
 #define LR_HEIGHT 480
-#define FPS 20
+#define FPS 15
 
 /* Initializes the camera and returns a V4L2Capture pointer
  */

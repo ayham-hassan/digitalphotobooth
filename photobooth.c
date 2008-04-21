@@ -79,10 +79,10 @@ gboolean init_app (DigitalPhotoBooth *booth)
     booth->window = GTK_WIDGET (gtk_builder_get_object (builder, "window"));
     booth->wizard_panel = GTK_WIDGET (gtk_builder_get_object (builder, "wizard_panel"));
     booth->money_message_label = GTK_WIDGET (gtk_builder_get_object (builder, "money_message_label"));
-    booth->take_photo_progress = GTK_WIDGET (gtk_builder_get_object (builder, "take_photo_progress"));
     booth->money_forward_button = GTK_WIDGET (gtk_builder_get_object (builder, "money_forward_button"));
-    booth->videobox1 = GTK_WIDGET (gtk_builder_get_object (builder, "videobox1"));
-    booth->videobox2 = GTK_WIDGET (gtk_builder_get_object (builder, "videobox2"));
+    booth->take_photo_button = GTK_WIDGET (gtk_builder_get_object (builder, "take_photo_button"));
+    booth->take_photo_progress = GTK_WIDGET (gtk_builder_get_object (builder, "take_photo_progress"));
+    booth->videobox = GTK_WIDGET (gtk_builder_get_object (builder, "videobox"));
     
     /* setup money handler variables */
     booth->money_total = 4;
@@ -91,7 +91,6 @@ gboolean init_app (DigitalPhotoBooth *booth)
     
     /* set the streaming video pointers to NULL */
     booth->capture = NULL;
-    booth->videobox = NULL;
     
     booth->video_source_id = 0;
 	booth->timer_source_id = 0;
@@ -118,9 +117,16 @@ void on_window_destroy (GtkObject *object, DigitalPhotoBooth *booth)
         booth->video_source_id = 0;
     }
     
+    if (booth->timer_source_id != 0)
+    {
+        g_source_remove(booth->timer_source_id);
+        booth->timer_source_id = 0;
+    }
+    
     /* check if camera was open already and close if necessary */
     if (booth->capture != NULL)
     {
+        v4l2CaptureStopStreaming (booth->capture);
         close_camera (booth->capture);
     }
     
@@ -135,10 +141,8 @@ void on_money_forward_button_clicked (GtkWidget *button, DigitalPhotoBooth *boot
     if (booth->capture == NULL)
     {
         booth->capture = open_camera();
+        v4l2CaptureStartStreaming (booth->capture, 0, 4);
     }
-    
-    /* point to the current drawing area */
-    booth->videobox = booth->videobox1;
 	
 	/* get the current frame */
 	booth->frame = getFrame (booth->capture);
@@ -173,11 +177,10 @@ gboolean camera_process (DigitalPhotoBooth *booth)
 
 void on_take_photo_button_clicked (GtkWidget *button, DigitalPhotoBooth *booth)
 {
-    gtk_notebook_next_page ((GtkNotebook*)booth->wizard_panel);
+    //gtk_notebook_next_page ((GtkNotebook*)booth->wizard_panel);
+    gtk_widget_hide (booth->take_photo_button);
+    gtk_widget_show (booth->take_photo_progress);
     
-    /* point to the current drawing area */
-    booth->videobox = booth->videobox2;
-
     /* start the countdown timer */
     timer_start(booth);
 }
@@ -201,10 +204,30 @@ gboolean timer_process (DigitalPhotoBooth *booth)
     }
     else
     {
-        gtk_notebook_prev_page((GtkNotebook*)booth->wizard_panel);
+        //gtk_notebook_prev_page((GtkNotebook*)booth->wizard_panel);
         
-        /* point to the current drawing area */
-        booth->videobox = booth->videobox1;
+        if (booth->video_source_id != 0)
+        {
+            g_source_remove(booth->video_source_id);
+            booth->video_source_id = 0;
+        }
+    
+        if (booth->capture != NULL)
+        {
+            v4l2CaptureStopStreaming (booth->capture);
+            
+            VidSize resolution;
+            v4l2CaptureGetResolution(booth->capture, &resolution);
+            capture_hr_jpg (booth->capture, &resolution, "testImg.jpg", 85);
+            
+            v4l2CaptureStartStreaming (booth->capture, 0, 4);
+        }
+        
+        /* start a timeout which updates the drawing area */
+        booth->video_source_id = g_idle_add ((GSourceFunc)camera_process, booth);
+        
+        gtk_widget_show (booth->take_photo_button);
+        gtk_widget_hide (booth->take_photo_progress);
 
         return FALSE;
     }
