@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE glade-interface SYSTEM "glade-2.0.dtd">
-<!--Generated with glade3 3.4.0 on Tue Apr 15 19:07:49 2008 -->
+<!--Generated with glade3 3.4.0 on Sun Apr 20 22:48:28 2008 -->
 <glade-interface>
   <widget class="GtkWindow" id="window">
     <property name="width_request">1024</property>
@@ -108,7 +108,7 @@
                   </widget>
                 </child>
                 <child>
-                  <widget class="GtkDrawingArea" id="videobox1">
+                  <widget class="GtkDrawingArea" id="videobox">
                     <property name="width_request">640</property>
                     <property name="height_request">480</property>
                     <property name="visible">True</property>
@@ -135,6 +135,7 @@
             </child>
             <child>
               <widget class="GtkHBox" id="hbox3">
+                <property name="height_request">75</property>
                 <property name="visible">True</property>
                 <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
                 <child>
@@ -144,15 +145,31 @@
                   </widget>
                 </child>
                 <child>
-                  <widget class="GtkButton" id="take_photo_button">
-                    <property name="height_request">75</property>
+                  <widget class="GtkVBox" id="vbox1">
                     <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="receives_default">True</property>
                     <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-                    <property name="label" translatable="yes">Take Photo!</property>
-                    <property name="response_id">0</property>
-                    <signal name="clicked" handler="on_take_photo_button_clicked"/>
+                    <child>
+                      <widget class="GtkButton" id="take_photo_button">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">True</property>
+                        <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
+                        <property name="label" translatable="yes">Take Photo!</property>
+                        <property name="response_id">0</property>
+                        <signal name="clicked" handler="on_take_photo_button_clicked"/>
+                      </widget>
+                    </child>
+                    <child>
+                      <widget class="GtkProgressBar" id="take_photo_progress">
+                        <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
+                        <property name="show_text">True</property>
+                        <property name="orientation">GTK_PROGRESS_RIGHT_TO_LEFT</property>
+                        <property name="text" translatable="yes">Taking picture in 5 seconds...</property>
+                      </widget>
+                      <packing>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
                   </widget>
                   <packing>
                     <property name="position">1</property>
@@ -196,31 +213,65 @@
             <property name="visible">True</property>
             <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
             <child>
-              <widget class="GtkHBox" id="hbox6">
+              <widget class="GtkImage" id="image1">
+                <property name="visible">True</property>
+                <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
+                <property name="stock">gtk-missing-image</property>
+              </widget>
+            </child>
+            <child>
+              <widget class="GtkHBox" id="hbox2">
                 <property name="visible">True</property>
                 <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
                 <child>
-                  <widget class="GtkFixed" id="fixed11">
+                  <widget class="GtkButton" id="button2">
                     <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">True</property>
                     <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
+                    <property name="response_id">0</property>
+                    <child>
+                      <widget class="GtkImage" id="image2">
+                        <property name="visible">True</property>
+                        <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
+                        <property name="stock">gtk-missing-image</property>
+                      </widget>
+                    </child>
                   </widget>
                 </child>
                 <child>
-                  <widget class="GtkDrawingArea" id="videobox2">
-                    <property name="width_request">640</property>
-                    <property name="height_request">480</property>
+                  <widget class="GtkButton" id="button3">
                     <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">True</property>
                     <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
+                    <property name="response_id">0</property>
+                    <child>
+                      <widget class="GtkImage" id="image3">
+                        <property name="visible">True</property>
+                        <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
+                        <property name="stock">gtk-missing-image</property>
+                      </widget>
+                    </child>
                   </widget>
                   <packing>
-                    <property name="fill">False</property>
                     <property name="position">1</property>
                   </packing>
                 </child>
                 <child>
-                  <widget class="GtkFixed" id="fixed12">
+                  <widget class="GtkButton" id="button4">
                     <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">True</property>
                     <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
+                    <property name="response_id">0</property>
+                    <child>
+                      <widget class="GtkImage" id="image4">
+                        <property name="visible">True</property>
+                        <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
+                        <property name="stock">gtk-missing-image</property>
+                      </widget>
+                    </child>
                   </widget>
                   <packing>
                     <property name="position">2</property>
@@ -228,11 +279,12 @@
                 </child>
               </widget>
               <packing>
-                <property name="fill">False</property>
+                <property name="position">1</property>
               </packing>
             </child>
             <child>
-              <widget class="GtkHBox" id="hbox2">
+              <widget class="GtkHBox" id="hbox5">
+                <property name="height_request">75</property>
                 <property name="visible">True</property>
                 <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
                 <child>
@@ -242,13 +294,14 @@
                   </widget>
                 </child>
                 <child>
-                  <widget class="GtkProgressBar" id="take_photo_progress">
-                    <property name="height_request">75</property>
+                  <widget class="GtkButton" id="button1">
                     <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">True</property>
                     <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-                    <property name="show_text">True</property>
-                    <property name="orientation">GTK_PROGRESS_RIGHT_TO_LEFT</property>
-                    <property name="text" translatable="yes">Taking picture in 5 seconds...</property>
+                    <property name="label" translatable="yes">gtk-go-forward</property>
+                    <property name="use_stock">True</property>
+                    <property name="response_id">0</property>
                   </widget>
                   <packing>
                     <property name="position">1</property>
@@ -267,7 +320,7 @@
               <packing>
                 <property name="expand">False</property>
                 <property name="padding">15</property>
-                <property name="position">1</property>
+                <property name="position">2</property>
               </packing>
             </child>
           </widget>

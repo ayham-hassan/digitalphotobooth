@@ -16,6 +16,8 @@ $(EXECUTABLE): $(OBJECTS) $(INCLUDE)
 
 .c.o:
 	$(CC) $(CFLAGS) $< -o $@
+	
+rebuild: realclean $(EXECUTABLE)
 
 clean:
 	rm -f *.o

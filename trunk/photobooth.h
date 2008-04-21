@@ -28,9 +28,8 @@ typedef struct
     VidFrame *frame;
     guint video_source_id;
     GtkWidget *videobox;
-    GtkWidget *videobox1;
+    GtkWidget *take_photo_button;
     GtkWidget *take_photo_progress;
-    GtkWidget *videobox2;
     gint timer_left;
     gint timer_total;
     guint timer_source_id;
