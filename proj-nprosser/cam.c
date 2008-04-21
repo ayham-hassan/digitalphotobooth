@@ -126,7 +126,6 @@ int write_jpg(VidFrame *frame, char *filename, int quality){
   jpeg_set_quality(&cinfo, 90, TRUE);
   jpeg_start_compress(&cinfo, TRUE);
 
-  //rowStride = cinfo.image_width;
   rowStride = vidFrameGetRowStride(rgbFrame);
   while(cinfo.next_scanline < cinfo.image_height){
     row_pointer[0] = &imageData[cinfo.next_scanline * rowStride];
@@ -155,8 +154,6 @@ int capture_hr_jpg(V4L2Capture *capture, VidSize *lowRes, char *fileName,
   int retVal = 0, counter = 0;
   VidSize highResolution;
 
-  //v4l2CaptureStopStreaming(capture);
-
   highResolution.width = HR_WIDTH;
   highResolution.height = HR_HEIGHT;
   v4l2CaptureSetResolution(capture, &highResolution);
@@ -173,8 +170,7 @@ int capture_hr_jpg(V4L2Capture *capture, VidSize *lowRes, char *fileName,
   retVal = write_jpg(highFrame, fileName, 85);
 
   v4l2CaptureStopStreaming(capture);
-  v4l2CaptureSetResolution(capture, lowRes);
-  //v4l2CaptureStartStreaming(capture, 0, 4);
+  v4l2CaptureSetImageFormat(capture, (fourcc_t)YUYV, lowRes);
 
   return retVal;
 }
