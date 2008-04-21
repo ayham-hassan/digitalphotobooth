@@ -195,41 +195,41 @@ void timer_start (DigitalPhotoBooth *booth)
 
 gboolean timer_process (DigitalPhotoBooth *booth)
 {
-  gtk_progress_bar_set_fraction ((GtkProgressBar*)booth->take_photo_progress, booth->timer_left / (double)booth->timer_total );
-  (booth->timer_left)--;
-    
-  if ((booth->timer_left) >= 0)
+    gtk_progress_bar_set_fraction ((GtkProgressBar*)booth->take_photo_progress, booth->timer_left / (double)booth->timer_total );
+    (booth->timer_left)--;
+
+    if ((booth->timer_left) >= 0)
     {
       return TRUE;
     }
-  else
+    else
     {
-      //gtk_notebook_prev_page((GtkNotebook*)booth->wizard_panel);
-        
-      if (booth->video_source_id != 0)
+        //gtk_notebook_prev_page((GtkNotebook*)booth->wizard_panel);
+      
+        if (booth->video_source_id != 0)
         {
-          g_source_remove(booth->video_source_id);
-          booth->video_source_id = 0;
+            g_source_remove(booth->video_source_id);
+            booth->video_source_id = 0;
         }
     
-      if (booth->capture != NULL)
+        if (booth->capture != NULL)
         {
-          v4l2CaptureStopStreaming (booth->capture);
-          
-          VidSize resolution;
-          v4l2CaptureGetResolution(booth->capture, &resolution);
-          capture_hr_jpg (booth->capture, &resolution, "testImg.jpg", 85);
+            v4l2CaptureStopStreaming (booth->capture);
 
-          v4l2CaptureStartStreaming (booth->capture, 0, 4);
+            VidSize resolution;
+            v4l2CaptureGetResolution(booth->capture, &resolution);
+            capture_hr_jpg (booth->capture, &resolution, "testImg.jpg", 85);
+
+            v4l2CaptureStartStreaming (booth->capture, 0, 4);
         }
         
-      /* start a timeout which updates the drawing area */
-      booth->video_source_id = g_idle_add ((GSourceFunc)camera_process, booth);
-        
-      gtk_widget_show (booth->take_photo_button);
-      gtk_widget_hide (booth->take_photo_progress);
+        /* start a timeout which updates the drawing area */
+        booth->video_source_id = g_idle_add ((GSourceFunc)camera_process, booth);
 
-      return FALSE;
+        gtk_widget_show (booth->take_photo_button);
+        gtk_widget_hide (booth->take_photo_progress);
+
+        return FALSE;
     }
 }
 
@@ -270,3 +270,4 @@ gboolean on_window_key_press_event (GtkWidget *window, GdkEventKey *event, Digit
 
     return FALSE;
 }
+
