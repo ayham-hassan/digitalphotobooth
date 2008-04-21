@@ -1,10 +1,11 @@
-#include <stdio.h>
 #include <stdlib.h>
+#include <linux/videodev.h>
+#include <stdio.h>
 #include "frame.h"
 #include "drv-v4l2.h"
-#include <linux/videodev.h>
 #include "cam.h"
 #include "jpeglib.h"
+
 
 /* Initializes the camera and returns a V4L2Capture pointer
  */
@@ -162,7 +163,7 @@ int capture_hr_jpg(V4L2Capture *capture, VidSize *lowRes, char *fileName,
 
   //It takes a few frames for the camera to equalize color and brightness
   VidFrame *highFrame = v4l2CaptureQueryFrame(capture);
-  for(counter = 0; counter < 10; counter++){
+  for(counter = 0; counter < 1; counter++){
     highFrame = v4l2CaptureQueryFrame(capture);
   }
 
@@ -171,6 +172,8 @@ int capture_hr_jpg(V4L2Capture *capture, VidSize *lowRes, char *fileName,
 
   v4l2CaptureStopStreaming(capture);
   v4l2CaptureSetImageFormat(capture, (fourcc_t)YUYV, lowRes);
+
+  printf("%f \n", ((double)(stt - st)) / CLOCKS_PER_SEC);
 
   return retVal;
 }
