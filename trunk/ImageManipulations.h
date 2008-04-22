@@ -23,7 +23,7 @@
 #define ERROR_VAL -1
 #define OK_VAL 0
 
-gboolean image_resize(char * inImage, char * outImage, char * imageDim, GPid *child_pid, GError *error);
+gboolean image_resize(char * inImage, char * outImage, char * imageDim, GError *error);
  
 /******************************************************************************
  *
