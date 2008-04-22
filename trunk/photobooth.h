@@ -27,13 +27,11 @@ typedef struct
     
     /* second and third panel - streaming video */
     V4L2Capture *capture;
-    VidFrame *frame;
     guint video_source_id;
     GtkWidget *videobox;
     GtkWidget *take_photo_button;
     GtkWidget *take_photo_progress;
     guint num_photos_taken;
-    GPid convert_pid;
     gint timer_left;
     gint timer_total;
     guint timer_source_id;
