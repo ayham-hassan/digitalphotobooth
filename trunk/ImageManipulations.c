@@ -10,6 +10,7 @@
  * 	 @authors -	David M. Winiarski - dmw1407@rit.edu
  */
 
+#include <unistd.h>
 #include <glib.h>
 #include "ImageManipulations.h"
 

@@ -4,11 +4,11 @@
  */
 
 #include <gtk/gtk.h>
-#include "photobooth.h"
 #include "proj-nprosser/frame.h"
 #include "proj-nprosser/cam.h"
 #include "ImageManipulations.h"
 #include "FileHandler.h"
+#include "photobooth.h"
 
 int main (int argc, char *argv[])
 {

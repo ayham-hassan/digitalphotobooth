@@ -4,6 +4,7 @@
  * 	 @authors -	David M. Winiarski - dmw1407@rit.edu
  ******************************************************************************/
 
+#include <unistd.h>
 #include "FileHandler.h"
 
  /******************************************************************************
@@ -18,7 +19,7 @@
  *****************************************************************************/
 int printImage(char * toPrint)
 {
-	int i, pid, childStatus, retVal;
+	int pid, childStatus, retVal;
 
 	/* Setup the argument strings. */
 	char cmd[4] = "lpr";
@@ -59,5 +60,7 @@ int printImage(char * toPrint)
 			retVal = ERROR_VAL;
 		}
 	}
+	
+	return retVal;
 }
 
