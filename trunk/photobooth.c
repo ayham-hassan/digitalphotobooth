@@ -94,6 +94,8 @@ gboolean init_app (DigitalPhotoBooth *booth)
     
     booth->video_source_id = 0;
 	booth->timer_source_id = 0;
+	
+	booth->num_photos_taken = 0;
     
     /* connect signals, passing our DigitalPhotoBooth struct as user data */
     gtk_builder_connect_signals (builder, booth);
@@ -144,18 +146,7 @@ void on_money_forward_button_clicked (GtkWidget *button, DigitalPhotoBooth *boot
         v4l2CaptureStartStreaming (booth->capture, 0, 4);
     }
 	
-	/* get the current frame */
-	booth->frame = getFrame (booth->capture);
-
-    /* draw the current frame on the drawing area */
-    gdk_draw_rgb_image (booth->videobox->window, booth->videobox->style->white_gc,
-                        0, 0, LR_WIDTH, LR_HEIGHT, GDK_RGB_DITHER_NONE,
-                        vidFrameGetImageData(booth->frame), 3 * LR_WIDTH);
-    
-    /* frame reference no longer necessary */
-    vidFrameRelease (&booth->frame);
-    
-    /* start a timeout which updates the drawing area */
+	/* start a timeout which updates the drawing area */
     booth->video_source_id = g_idle_add ((GSourceFunc)camera_process, booth);
 }
 
@@ -175,24 +166,44 @@ gboolean camera_process (DigitalPhotoBooth *booth)
     return TRUE;
 }
 
+void convert_done (GPid pid, gint status, DigitalPhotoBooth *booth)
+{
+    //printf ("hooray!\n");
+}
+
 gboolean take_photo_process (DigitalPhotoBooth *booth)
 {
+    gchar filename[12];
+    gchar filename_sm[15];
+    sprintf (filename, "Img%04d.jpg", booth->num_photos_taken);
+    sprintf (filename_sm, "Img%04d_sm.jpg", booth->num_photos_taken);
+    
     if (booth->capture != NULL)
     {
         v4l2CaptureStopStreaming (booth->capture);
 
         VidSize resolution;
         v4l2CaptureGetResolution(booth->capture, &resolution);
-        capture_hr_jpg (booth->capture, &resolution, "testImg.jpg", 85);
-
-        v4l2CaptureStartStreaming (booth->capture, 0, 4);
+        capture_hr_jpg (booth->capture, &resolution, filename, 85);
+        
+        image_resize (filename, filename_sm, "320x240", &booth->convert_pid, NULL);
+        g_child_watch_add (booth->convert_pid, (GChildWatchFunc)convert_done, booth);
+        
+        if (++booth->num_photos_taken < NUM_PHOTOS)
+        {
+            v4l2CaptureStartStreaming (booth->capture, 0, 4);
+            
+            /* start a timeout which updates the drawing area */
+            booth->video_source_id = g_idle_add ((GSourceFunc)camera_process, booth);
+            
+            gtk_widget_show (booth->take_photo_button);
+            gtk_widget_hide (booth->take_photo_progress);
+        }
+        else
+        {
+            gtk_notebook_next_page ((GtkNotebook*)booth->wizard_panel);
+        }
     }
-    
-    /* start a timeout which updates the drawing area */
-    booth->video_source_id = g_idle_add ((GSourceFunc)camera_process, booth);
-
-    gtk_widget_show (booth->take_photo_button);
-    gtk_widget_hide (booth->take_photo_progress);
 
     return FALSE;
 }

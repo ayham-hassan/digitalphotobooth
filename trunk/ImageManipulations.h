@@ -16,11 +16,14 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <errno.h>
+#include <glib.h>
 
 #define MAX_SIZE 255
 
 #define ERROR_VAL -1
 #define OK_VAL 0
+
+gboolean image_resize(char * inImage, char * outImage, char * imageDim, GPid *child_pid, GError *error);
  
 /******************************************************************************
  *

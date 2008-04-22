@@ -10,6 +10,7 @@
  * 	 @authors -	David M. Winiarski - dmw1407@rit.edu
  */
 
+#include <glib.h>
 #include "ImageManipulations.h"
 
 extern int errno;
@@ -42,6 +43,35 @@ extern int errno;
  }
  
  
+  /******************************************************************************
+ *
+ *  Function:       resizeImages
+ *  Description:    This function will create a two smaller copies of the
+ *					original photo.
+ *  Inputs:           
+ *  Outputs:         
+ *  Routines Called: 
+ *
+ *****************************************************************************/
+gboolean image_resize(char * inImage, char * outImage, char * imageDim, GPid *child_pid, GError *error)
+{
+	/* Setup local vars. */
+	char resize[8] = "-resize";
+	
+	char * args[6];
+	
+	/* Setup the arguments for the commands. */
+	args[0] = cnvCmd;
+	args[1] = inImage;
+	args[2] = resize;
+	args[3] = imageDim;
+	args[4] = outImage;
+	args[5] = '\0';
+
+    return g_spawn_async (NULL, args, NULL, G_SPAWN_DO_NOT_REAP_CHILD | G_SPAWN_SEARCH_PATH, NULL, NULL, child_pid, &error);
+}
+ 
+ 
  /******************************************************************************
  *
  *  Function:       resizeImages
@@ -56,7 +86,7 @@ int resizeImages(char * inImage, char * smImage, char * lgImage)
  {
  
 	/* Setup local vars. */
-	int i, pid1, pid2, childStatus, retVal;
+	int pid1, pid2, childStatus, retVal;
 	char root[MAX_SIZE];
 	char smSuffix[8] = { '_', 's', 'm', '.', 'j', 'p', 'g', '\0'};
 	char lgSuffix[8] = { '_', 'l', 'g', '.', 'j', 'p', 'g', '\0'};
@@ -161,7 +191,7 @@ int resizeImages(char * inImage, char * smImage, char * lgImage)
 int createOilBlobImage(char * inImage, char * oilBlobImage)
 {
 	/* Setup local vars. */
-	int pid1, pid2, childStatus, retVal;
+	int pid1, childStatus, retVal;
 	char root[MAX_SIZE];
 	char oilSuffix[9] = { '_', 'o', 'i', 'l', '.', 'j', 'p', 'g', '\0'};	
 	char paint[7] = {'-', 'p', 'a', 'i', 'n', 't', '\0'};
@@ -226,7 +256,7 @@ int createOilBlobImage(char * inImage, char * oilBlobImage)
 int createCharcoalImage(char * inImage, char * charcoalImage)
 {
 	/* Setup local vars. */
-	int pid1, pid2, childStatus, retVal;
+	int pid1, childStatus, retVal;
 	char root[MAX_SIZE];
 	char cclSuffix[9] = { '_', 'c', 'c', 'l', '.', 'j', 'p', 'g', '\0'};	
 	char charcoal[10] = {'-', 'c', 'h', 'a', 'r', 'c', 'o', 'a', 'l','\0'};
@@ -291,7 +321,7 @@ int createCharcoalImage(char * inImage, char * charcoalImage)
 int createTexturedImage(char * inImage, char * texImage, char * texturedImage)
 {
 	/* Setup local vars. */
-	int pid1, pid2, childStatus, retVal;
+	int pid1, childStatus, retVal;
 	char root[MAX_SIZE];
 	char texSuffix[9] = { '_', 't', 'e', 'x', '.', 'j', 'p', 'g', '\0'};	
 	char cmpCmd[10] = { 'c', 'o', 'm', 'p', 'o', 's', 'i', 't', 'e', '\0' };

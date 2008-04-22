@@ -1,12 +1,14 @@
 #ifndef PHOTOBOOTH_H_
 #define PHOTOBOOTH_H_
 
-/* location of UI XML file relative to path in which program is running */
-#define BUILDER_XML_FILE "photobooth.xml"
-
 #include <gtk/gtk.h>
 #include "proj-nprosser/frame.h"
 #include "proj-nprosser/drv-v4l2.h"
+
+/* location of UI XML file relative to path in which program is running */
+#define BUILDER_XML_FILE "photobooth.xml"
+
+#define NUM_PHOTOS 3
 
 typedef struct
 {
@@ -30,6 +32,8 @@ typedef struct
     GtkWidget *videobox;
     GtkWidget *take_photo_button;
     GtkWidget *take_photo_progress;
+    guint num_photos_taken;
+    GPid convert_pid;
     gint timer_left;
     gint timer_total;
     guint timer_source_id;
