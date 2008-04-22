@@ -53,7 +53,7 @@ extern int errno;
  *  Routines Called: 
  *
  *****************************************************************************/
-gboolean image_resize(char * inImage, char * outImage, char * imageDim, GPid *child_pid, GError *error)
+gboolean image_resize(char * inImage, char * outImage, char * imageDim, GError *error)
 {
 	/* Setup local vars. */
 	char resize[8] = "-resize";
@@ -68,7 +68,7 @@ gboolean image_resize(char * inImage, char * outImage, char * imageDim, GPid *ch
 	args[4] = outImage;
 	args[5] = '\0';
 
-    return g_spawn_async (NULL, args, NULL, G_SPAWN_DO_NOT_REAP_CHILD | G_SPAWN_SEARCH_PATH, NULL, NULL, child_pid, &error);
+    return g_spawn_sync (NULL, args, NULL, G_SPAWN_SEARCH_PATH, NULL, NULL, NULL, NULL, NULL, &error);
 }
  
  

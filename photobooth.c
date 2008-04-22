@@ -175,8 +175,10 @@ gboolean take_photo_process (DigitalPhotoBooth *booth)
 {
     gchar filename[12];
     gchar filename_sm[15];
+    gchar filename_lg[15];
     sprintf (filename, "Img%04d.jpg", booth->num_photos_taken);
     sprintf (filename_sm, "Img%04d_sm.jpg", booth->num_photos_taken);
+    sprintf (filename_lg, "Img%04d_lg.jpg", booth->num_photos_taken);
     
     if (booth->capture != NULL)
     {
@@ -186,8 +188,9 @@ gboolean take_photo_process (DigitalPhotoBooth *booth)
         v4l2CaptureGetResolution(booth->capture, &resolution);
         capture_hr_jpg (booth->capture, &resolution, filename, 85);
         
-        image_resize (filename, filename_sm, "320x240", &booth->convert_pid, NULL);
-        g_child_watch_add (booth->convert_pid, (GChildWatchFunc)convert_done, booth);
+        image_resize (filename, filename_sm, "320x240", NULL);
+        image_resize (filename, filename_lg, "640x480", NULL);
+        //g_child_watch_add (booth->convert_pid, (GChildWatchFunc)convert_done, booth);
         
         if (++booth->num_photos_taken < NUM_PHOTOS)
         {
