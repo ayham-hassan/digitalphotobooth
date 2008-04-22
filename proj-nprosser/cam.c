@@ -12,8 +12,8 @@
 V4L2Capture *open_camera(){
   V4L2Capture *capture = v4l2CaptureOpen("/dev/video0");
   VidSize _resolution;
-  _resolution.width = LR_WIDTH;
-  _resolution.height = LR_HEIGHT;
+  _resolution.width = HR_WIDTH;
+  _resolution.height = HR_HEIGHT;
   v4l2CaptureSetImageFormat(capture, (fourcc_t)YUYV, &_resolution);
   v4l2CaptureSetFPS(capture, FPS);
   //v4l2CaptureStartStreaming(capture,0,4);
@@ -150,28 +150,16 @@ int write_jpg(VidFrame *frame, char *filename, int quality){
  *  quality - integer in the range [0, 100] specifying JPEG quality parameter
  *  @return 0 if the process was successful, nonzero otherwise
  */
-int capture_hr_jpg(V4L2Capture *capture, VidSize *lowRes, char *fileName, 
-                   int quality){
+int capture_hr_jpg(V4L2Capture *capture, char *fileName, int quality){
   int retVal = 0, counter = 0;
-  VidSize highResolution;
-
-  highResolution.width = HR_WIDTH;
-  highResolution.height = HR_HEIGHT;
-  v4l2CaptureSetResolution(capture, &highResolution);
-
-  v4l2CaptureStartStreaming(capture, 0, 4);
-
-  //It takes a few frames for the camera to equalize color and brightness
+  
   VidFrame *highFrame = v4l2CaptureQueryFrame(capture);
   for(counter = 0; counter < 1; counter++){
     highFrame = v4l2CaptureQueryFrame(capture);
   }
 
-  //Using jpeglib
+  /* Using jpeglib */
   retVal = write_jpg(highFrame, fileName, 85);
-
-  v4l2CaptureStopStreaming(capture);
-  v4l2CaptureSetImageFormat(capture, (fourcc_t)YUYV, lowRes);
 
   return retVal;
 }

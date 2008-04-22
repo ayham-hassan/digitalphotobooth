@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE glade-interface SYSTEM "glade-2.0.dtd">
-<!--Generated with glade3 3.4.0 on Mon Apr 21 19:22:30 2008 -->
+<!--Generated with glade3 3.4.0 on Tue Apr 22 01:03:46 2008 -->
 <glade-interface>
   <widget class="GtkWindow" id="window">
     <property name="width_request">1024</property>
@@ -297,7 +297,7 @@
                   </widget>
                 </child>
                 <child>
-                  <widget class="GtkButton" id="button1">
+                  <widget class="GtkButton" id="photo_select_forward_button">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
@@ -305,6 +305,7 @@
                     <property name="label" translatable="yes">gtk-go-forward</property>
                     <property name="use_stock">True</property>
                     <property name="response_id">0</property>
+                    <signal name="clicked" handler="on_photo_select_forward_button_clicked"/>
                   </widget>
                   <packing>
                     <property name="position">1</property>

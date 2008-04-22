@@ -5,8 +5,8 @@
 #define V4L2_JPG_H
 
 //Define the image size for high-resolution image capture
-#define HR_WIDTH 1600
-#define HR_HEIGHT 1200
+#define HR_WIDTH 960
+#define HR_HEIGHT 720
 /* Raw image format supported by QuickCam Pro 9000
  * This code is defined in fourcc.c
  */
@@ -47,7 +47,6 @@ int write_jpg(VidFrame *frame, char *fileName, int quality);
  *  quality - integer in the range [0, 100] specifying JPEG quality parameter
  *  @return 0 if the process was successful, nonzero otherwise
  */
-int capture_hr_jpg(V4L2Capture *capture, VidSize *lowRes, char *fileName, 
-                   int quality);
+int capture_hr_jpg(V4L2Capture *capture, char *fileName, int quality);
 
 #endif
