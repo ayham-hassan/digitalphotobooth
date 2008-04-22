@@ -173,7 +173,5 @@ int capture_hr_jpg(V4L2Capture *capture, VidSize *lowRes, char *fileName,
   v4l2CaptureStopStreaming(capture);
   v4l2CaptureSetImageFormat(capture, (fourcc_t)YUYV, lowRes);
 
-  printf("%f \n", ((double)(stt - st)) / CLOCKS_PER_SEC);
-
   return retVal;
 }
