@@ -16,7 +16,6 @@ V4L2Capture *open_camera(){
   _resolution.height = HR_HEIGHT;
   v4l2CaptureSetImageFormat(capture, (fourcc_t)YUYV, &_resolution);
   v4l2CaptureSetFPS(capture, FPS);
-  //v4l2CaptureStartStreaming(capture,0,4);
 
   return capture;
 }
@@ -154,9 +153,6 @@ int capture_hr_jpg(V4L2Capture *capture, char *fileName, int quality){
   int retVal = 0, counter = 0;
   
   VidFrame *highFrame = v4l2CaptureQueryFrame(capture);
-  for(counter = 0; counter < 1; counter++){
-    highFrame = v4l2CaptureQueryFrame(capture);
-  }
 
   /* Using jpeglib */
   retVal = write_jpg(highFrame, fileName, 85);
