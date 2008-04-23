@@ -17,7 +17,7 @@
  *                  outImage - the resized image
  *                  imageDim - the image dimensions 
  *                  error - place to store error information
- *  Outputs:        None.
+ *  Outputs:        TRUE on success, FALSE if error is set.
  *  Routines Called: g_spawn_sync
  *
  *****************************************************************************/
@@ -32,7 +32,7 @@ gboolean image_resize(char * inImage, char * outImage, char * imageDim, GError *
  *                  outImage - the oil painted image
  *                  id - the ID of the spawned process
  *                  error - place to store error information
- *  Outputs:        None.
+ *  Outputs:        TRUE on success, FALSE if error is set.
  *  Routines Called: g_spawn_async
  *
  *****************************************************************************/
@@ -47,7 +47,7 @@ gboolean create_oil_blob_image(char * inImage, char * outImage, GPid * id, GErro
  *                  outImage - the oil painted image
  *                  id - the ID of the spawned process
  *                  error - place to store error information
- *  Outputs:        None
+ *  Outputs:        TRUE on success, FALSE if error is set.
  *  Routines Called: g_spawn_async
  *
  *****************************************************************************/
@@ -63,7 +63,7 @@ gboolean create_charcoal_image(char * inImage, char * outImage, GPid * id, GErro
  *                  texImage - the texture to apply to the image
  *                  id - the ID of the spawned process
  *                  error - place to store error information  
- *  Outputs:        None
+ *  Outputs:        TRUE on success, FALSE if error is set.
  *  Routines Called: g_spawn_async
  *
  *****************************************************************************/
