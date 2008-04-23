@@ -1,76 +1,70 @@
 /*
  * ImageManipulations.h
  * 
- *  Version:
- * 	  	$Id$
- * 
- *  Revisions:
- * 		$Log$
- * 
  * 	 @authors -	David M. Winiarski - dmw1407@rit.edu
  */
 
-#include <string.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <sys/types.h>
-#include <sys/wait.h>
-#include <errno.h>
+#include <unistd.h>
 #include <glib.h>
-
-#define MAX_SIZE 255
-
-#define ERROR_VAL -1
-#define OK_VAL 0
-
-gboolean image_resize(char * inImage, char * outImage, char * imageDim, GError *error);
  
+
 /******************************************************************************
  *
  *  Function:       resizeImages
  *  Description:    This function will create a two smaller copies of the
  *					original photo.
- *  Inputs:           
- *  Outputs:         
- *  Routines Called: 
+ *  Inputs:         inImage - the image to resize
+ *                  outImage - the resized image
+ *                  imageDim - the image dimensions 
+ *                  error - place to store error information
+ *  Outputs:        None.
+ *  Routines Called: g_spawn_sync
  *
  *****************************************************************************/
-int resizeImages(char * inImage, char * smImage, char * lgImage);
+gboolean image_resize(char * inImage, char * outImage, char * imageDim, GError *error);
 
 /******************************************************************************
  *
- *  Function:       createOilBlobImage
+ *  Function:       create_oil_blob_image
  *  Description:    This function will create an oil blob version of the provided
-					image.
- *  Inputs:           
- *  Outputs:         
- *  Routines Called: 
+ *					image.
+ *  Inputs:         inImage - the image to paint, 
+ *                  outImage - the oil painted image
+ *                  id - the ID of the spawned process
+ *                  error - place to store error information
+ *  Outputs:        None.
+ *  Routines Called: g_spawn_async
  *
  *****************************************************************************/
-int createOilBlobImage(char * inImage, char * oilBlobImage);
+gboolean create_oil_blob_image(char * inImage, char * outImage, GPid * id, GError *error);
 
 /******************************************************************************
  *
- *  Function:       createCharcoalImage
+ *  Function:       create_charcoal_image
  *  Description:    This function will create a charcoal version of the provided
-					image.
- *  Inputs:           
- *  Outputs:         
- *  Routines Called: 
+ *					image.
+ *  Inputs:         inImage - the image to paint, 
+ *                  outImage - the oil painted image
+ *                  id - the ID of the spawned process
+ *                  error - place to store error information
+ *  Outputs:        None
+ *  Routines Called: g_spawn_async
  *
  *****************************************************************************/
-int createCharcoalImage(char * inImage, char * charcoalImage);
+gboolean create_charcoal_image(char * inImage, char * outImage, GPid * id, GError *error);
 
 /******************************************************************************
  *
- *  Function:       createTexturedImage
+ *  Function:       create_textured_image
  *  Description:    This function will create a texturized version of the provided
-					image.
- *  Inputs:           
- *  Outputs:         
- *  Routines Called: 
+ *					image.
+ *  Inputs:         inImage - the image to paint, 
+ *                  outImage - the oil painted image
+ *                  texImage - the texture to apply to the image
+ *                  id - the ID of the spawned process
+ *                  error - place to store error information  
+ *  Outputs:        None
+ *  Routines Called: g_spawn_async
  *
  *****************************************************************************/
-int createTexturedImage(char * inImage, char * texImage, char * texturedImage);
-
-
+gboolean create_textured_image(char * inImage, char * texImage, char * outImage, GPid * id, GError *error);
