@@ -5,8 +5,10 @@
 #define V4L2_JPG_H
 
 //Define the image size for high-resolution image capture
-#define HR_WIDTH 960
+#define HR_WIDTH  960
 #define HR_HEIGHT 720
+//The maximum supported frame rate at 960x720
+#define FPS       10 
 /* Raw image format supported by QuickCam Pro 9000
  * This code is defined in fourcc.c
  */
@@ -14,7 +16,6 @@
 /* Low resolution video should be 640x480 */
 #define LR_WIDTH  640
 #define LR_HEIGHT 480
-#define FPS 15
 
 /* Initializes the camera and returns a V4L2Capture pointer
  */

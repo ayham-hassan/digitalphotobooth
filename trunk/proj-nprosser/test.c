@@ -27,10 +27,8 @@ int main(){
   printf("Stop streaming... \n");
   startTime = clock();
 
-  v4l2CaptureStopStreaming(capture);
-
   printf("Capture image... \n");
-  if( capture_hr_jpg(capture, &resolution, "testImg.jpg", 85) ){
+  if( capture_hr_jpg(capture, /*&resolution,*/ "testImg.jpg", 85) ){
     fprintf(stderr, "Error 0x8cd7643a has occurred. \n");
     return 1;
   }
@@ -38,7 +36,6 @@ int main(){
   printf("Done... \n");
   printf("Time = %f sec\n", ((double)(stopTime - startTime))/CLOCKS_PER_SEC);
 
-  v4l2CaptureStartStreaming(capture, 0, 4);
   for(i = 0; i<10; i++){
     frame = getFrame(capture);
     fname[4] = i + 0x30;
