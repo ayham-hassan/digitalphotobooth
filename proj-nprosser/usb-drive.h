@@ -1,14 +1,13 @@
+/*
+ * usb-drive.h
+ *
+ * Author: Nathan Prosser  ntp0166@rit.edu
+ *
+ */
+
 #ifndef _USBDRIVE_H_
 #define _USBDRIVE_H_
 
-char *expectedFiles[] = { ".", "..", "floppy0", "floppy", "cdrom0", "cdrom",
-                          ".hal-mtab", ".hal-mtab-lock" };
-
-/* isExpectedFilename
- * Checks to see if a given filename is within the list of expected files in
- *  /media.
- */
-int isExpectedFilename( char *filename );
 
 /* usbDriveName()
  * Finds the absolute path of a USB flash drive. This function makes several
@@ -19,6 +18,6 @@ int isExpectedFilename( char *filename );
  *  matter if any of these are not present, but if additional ones are present
  *  (eg a CD-ROM), that may be detected instead of the flash drive.
  */
-char *usbDriveName();
+char *getUSBDriveName();
 
 #endif
