@@ -1,3 +1,10 @@
+/*
+ * cam.c
+ *
+ * Author: Nathan Prosser  ntp0166@rit.edu
+ *
+ */
+
 #include <stdlib.h>
 #include <linux/videodev.h>
 #include <stdio.h>
@@ -33,23 +40,23 @@ void close_camera(V4L2Capture *capture){
  *  @return a VidFrame object with data in RGB24 format
  */
 VidFrame *getFrame(V4L2Capture *capture){
-  //capture frame
+  /* capture frame */
   VidFrame *myFrame = v4l2CaptureQueryFrame(capture);
   
-  //Convert the frame to RGB:
-  //Find the input format
+  /* Convert the frame to RGB:
+   * Find the input format */
   fourcc_t inputFormat = vidFrameGetFormat(myFrame);
   
-  //output format (24-bit RGB)
+  /* output format (24-bit RGB) */
   fourcc_t outputFormat = V4L2_PIX_FMT_RGB24;
   
-  //converter object
+  /* converter object */
   VidConv *converter = vidConvFind(inputFormat, outputFormat);
   
-  //new rgb frame
+  /* new rgb frame */
   VidFrame *rgbFrame = vidFrameCreate();
   
-  //do conversion
+  /* do conversion */
   if( !converter ){
     fprintf(stderr, "Couldn't find a valid converter.\n");
     exit(1);
@@ -78,20 +85,20 @@ int write_jpg(VidFrame *frame, char *filename, int quality){
   int rowStride;
   JSAMPLE *imageData;
 
-  //First we need to convert the frame to RGB
-  //Find the input format
+  /* First we need to convert the frame to RGB
+   * Find the input format */
   fourcc_t inputFormat = vidFrameGetFormat(frame);
-  //output format (24-bit RGB)
+  /* output format (24-bit RGB) */
   fourcc_t outputFormat = V4L2_PIX_FMT_RGB24;
   VidConv *converter;
   VidFrame *rgbFrame;
   
   if( inputFormat != outputFormat ){
-    //converter object
+    /* converter object */
     converter = vidConvFind(inputFormat, outputFormat);
-    //new rgb frame
+    /* new rgb frame */
     rgbFrame = vidFrameCreate();
-    //do conversion
+    /* do conversion */
     if( !converter ){
       fprintf(stderr, "Couldn't find a valid converter.\n");
       exit(1);
@@ -101,7 +108,7 @@ int write_jpg(VidFrame *frame, char *filename, int quality){
         exit(1);
       }
     }
-  } else { //input format is already rgb24
+  } else { /* input format is already rgb24 */
     rgbFrame = frame;
   }
 
