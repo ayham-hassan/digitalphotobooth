@@ -169,7 +169,9 @@ void on_money_forward_button_clicked (GtkWidget *button,
 void on_photo_select_forward_button_clicked (GtkWidget *button,
     DigitalPhotoBooth *booth)
 {
-    printImage ("Img0000.jpg");   
+    GPid pid;
+    printImage ("Img0000.jpg", &pid, NULL);
+    
 }
 
 void free_frame (guchar *pixels, VidFrame *frame)
