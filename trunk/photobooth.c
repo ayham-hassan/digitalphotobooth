@@ -11,6 +11,17 @@
 #include "FileHandler.h"
 #include "photobooth.h"
 
+/******************************************************************************
+ *
+ *  Function:       main
+ *  Description:    This function sets up the program and begins execution
+ *  Inputs:         argc - the number of arguments received
+ *                  argv - the arguments received
+ *  Outputs:        0 on exit success, Not 0 if an error occurs.
+ *  Routines Called: g_slice_new, gtk_init, init_app, gtk_widget_show,
+ *                  gtk_main, g_slice_free
+ *
+ *****************************************************************************/
 int main (int argc, char *argv[])
 {
     /* create the data structure */
@@ -37,11 +48,16 @@ int main (int argc, char *argv[])
     return 0;
 }
 
-/*
-We call error_message() any time we want to display an error message to the
-user. It will both show an error dialog and log the error to the terminal
-window.
-*/
+/******************************************************************************
+ *
+ *  Function:       error_message
+ *  Description:    This function will display an error message dialog box
+ *  Inputs:         message - the message string to display
+ *  Outputs:        
+ *  Routines Called: g_warning, gtk_message_dialog_new, gtk_window_set_title
+ *                  gtk_dialog_run, gtk_widget_destroy
+ *
+ *****************************************************************************/
 void error_message (const gchar *message)
 {
     GtkWidget               *dialog;
@@ -59,11 +75,17 @@ void error_message (const gchar *message)
     gtk_widget_destroy (dialog);         
 }
 
-/*
-We call init_app() when our program is starting to load our DigitalPhotoBooth
-struct with references to the widgets we need. This is done using GtkBuilder
-to read the XML file we created using Glade.
-*/
+/******************************************************************************
+ *
+ *  Function:       init_app
+ *  Description:    This function initializes the application variables
+ *  Inputs:         booth - a pointer to the DigitalPhotoBooth struct
+ *  Outputs:        TRUE on success, FALSE if an error occurs.
+ *  Routines Called: gtk_builder_new, gtk_builder_add_from_file, error_message
+ *                  g_error_free, gtk_builder_get_object, money_update, memset
+ *                  gtk_builder_connect_signals, g_object_unref
+ *
+ *****************************************************************************/
 gboolean init_app (DigitalPhotoBooth *booth)
 {
     GtkBuilder *builder;
@@ -94,14 +116,14 @@ gboolean init_app (DigitalPhotoBooth *booth)
         GTK_WIDGET (gtk_builder_get_object (builder, "take_photo_progress"));
     booth->videobox =
         GTK_WIDGET (gtk_builder_get_object (builder, "videobox"));
-    booth->image1_preview_image =
-        GTK_WIDGET (gtk_builder_get_object (builder, "image1_preview_image"));
-    booth->image2_preview_image =
-        GTK_WIDGET (gtk_builder_get_object (builder, "image2_preview_image"));
-    booth->image3_preview_image =
-        GTK_WIDGET (gtk_builder_get_object (builder, "image3_preview_image"));
-    booth->image_preview_area =
-        GTK_WIDGET (gtk_builder_get_object (builder, "image_preview_area"));
+    booth->preview_thumb1_image =
+        GTK_WIDGET (gtk_builder_get_object (builder, "preview_thumb1_image"));
+    booth->preview_thumb2_image =
+        GTK_WIDGET (gtk_builder_get_object (builder, "preview_thumb2_image"));
+    booth->preview_thumb3_image =
+        GTK_WIDGET (gtk_builder_get_object (builder, "preview_thumb3_image"));
+    booth->preview_large_image =
+        GTK_WIDGET (gtk_builder_get_object (builder, "preview_large_image"));
     
     /* setup money handler variables */
     booth->money_total = 4;
@@ -131,10 +153,17 @@ gboolean init_app (DigitalPhotoBooth *booth)
     return TRUE;
 }
 
-/* 
-When our window is destroyed, we want to break out of the GTK main loop. We do
-this by calling gtk_main_quit().
-*/
+/******************************************************************************
+ *
+ *  Function:       on_window_destroy
+ *  Description:    Callback function for the window being destroyed (closed)
+ *  Inputs:         object - a pointer to the window object
+ *                  booth - a pointer to the DigitalPhotoBooth struct
+ *  Outputs:        
+ *  Routines Called: g_source_remove, v42lCaptureStopStreaming, close_camera
+ *                  gtk_main_quit
+ *
+ *****************************************************************************/
 void on_window_destroy (GtkObject *object, DigitalPhotoBooth *booth)
 {
     /* check if the video idle source still exists and remove if necessary */
@@ -162,7 +191,21 @@ void on_window_destroy (GtkObject *object, DigitalPhotoBooth *booth)
 }
 
 /* General utility functions */
-gchar* get_image_filename_pointer (guint index, enum PHOTO_TYPE pt, DigitalPhotoBooth *booth)
+
+/******************************************************************************
+ *
+ *  Function:       get_image_filename_pointer
+ *  Description:    This function returns a pointer to the requested filename
+ *                  string.
+ *  Inputs:         index - the index of the image
+ *                  pt - the image type requested
+ *                  booth - a pointer to the DigitalPhotoBooth struct
+ *  Outputs:        a pointer to the requested string
+ *  Routines Called: 
+ *
+ *****************************************************************************/
+gchar* get_image_filename_pointer (guint index, enum PHOTO_TYPE pt,
+    DigitalPhotoBooth *booth)
 {
     if (index < NUM_PHOTOS)
     {
@@ -176,6 +219,17 @@ gchar* get_image_filename_pointer (guint index, enum PHOTO_TYPE pt, DigitalPhoto
 
 /* Functions for the first screen */
 
+/******************************************************************************
+ *
+ *  Function:       on_window_key_press_event
+ *  Description:    Callback function for window key press events
+ *  Inputs:         windows - a pointer to the window object
+ *                  event - a pointer to the key press event object
+ *                  booth - a pointer to the DigitalPhotoBooth struct
+ *  Outputs:        TRUE if event handled, FALSE if event should propagate.
+ *  Routines Called: money_insert, money_update
+ *
+ *****************************************************************************/
 gboolean on_window_key_press_event (GtkWidget *window, GdkEventKey *event,
     DigitalPhotoBooth *booth)
 {
@@ -202,12 +256,30 @@ gboolean on_window_key_press_event (GtkWidget *window, GdkEventKey *event,
     return FALSE;
 }
 
+/******************************************************************************
+ *
+ *  Function:       money_insert
+ *  Description:    This function increases the current money total.
+ *  Inputs:         booth - a pointer to the DigitalPhotoBooth struct
+ *  Outputs:        
+ *  Routines Called: 
+ *
+ *****************************************************************************/
 void money_insert (DigitalPhotoBooth *booth)
 {
     /* increase the amount of money inserted into the machine */
     ++booth->money_inserted;
 }
 
+/******************************************************************************
+ *
+ *  Function:       money_update
+ *  Description:    This function updates the money display.
+ *  Inputs:         booth - a pointer to the DigitalPhotoBooth struct
+ *  Outputs:        
+ *  Routines Called: gtk_widget_set_sensitive, sprintf, gtk_label_set_text
+ *
+ *****************************************************************************/
 void money_update (DigitalPhotoBooth *booth)
 {
     /* calculate the money still required */
@@ -218,6 +290,10 @@ void money_update (DigitalPhotoBooth *booth)
     {
         remaining = 0;
         gtk_widget_set_sensitive (booth->money_forward_button, TRUE);
+    }
+    else
+    {
+        gtk_widget_set_sensitive (booth->money_forward_button, FALSE);
     }
     
     /* update the display text */
@@ -230,6 +306,17 @@ void money_update (DigitalPhotoBooth *booth)
         booth->money_str);
 }
 
+/******************************************************************************
+ *
+ *  Function:       on_money_forward_button_clicked
+ *  Description:    Callback function for the money_forward_button
+ *  Inputs:         button - a pointer to the button object
+ *                  booth - a pointer to the DigitalPhotoBooth struct
+ *  Outputs:        
+ *  Routines Called: gtk_notebook_next_page, open_camera, g_idle_add
+ *                  v42lCaptureStartStreaming
+ *
+ *****************************************************************************/
 void on_money_forward_button_clicked (GtkWidget *button,
     DigitalPhotoBooth *booth)
 {
@@ -257,12 +344,34 @@ void on_money_forward_button_clicked (GtkWidget *button,
 
 /* Functions for the second screen */
 
+/******************************************************************************
+ *
+ *  Function:       free_frame
+ *  Description:    Callback function for freeing frame data.
+ *                  Only used when creating a pixbuf.
+ *  Inputs:         pixels - a pointer to the data array
+ *                  frame - a pointer to the frame struct
+ *  Outputs:        
+ *  Routines Called: vidFrameRelease
+ *
+ *****************************************************************************/
 void free_frame (guchar *pixels, VidFrame *frame)
 {
     /* release the received video frame */
     vidFrameRelease (&frame);
 }
 
+/******************************************************************************
+ *
+ *  Function:       camera_process
+ *  Description:    Callback function which gets a video frame, resizes it,
+ *                  and displays it.
+ *  Inputs:         booth - a pointer to the DigitalPhotoBooth struct
+ *  Outputs:        TRUE to schedule the task again, FALSE otherwise
+ *  Routines Called: getFrame, gdk_pixbuf_new_from_data, vidFrameGetImageData,
+ *                  gdk_pixbuf_scale_simple, gdk_draw_pixbuf, g_object_unref
+ *
+ *****************************************************************************/
 gboolean camera_process (DigitalPhotoBooth *booth)
 {
     /* get the current RGB frame */
@@ -291,15 +400,31 @@ gboolean camera_process (DigitalPhotoBooth *booth)
     return TRUE;
 }
 
+
+/******************************************************************************
+ *
+ *  Function:       take_photo_process
+ *  Description:    Callback function which captures and process a photo from
+ *                  the video stream.
+ *  Inputs:         booth - a pointer to the DigitalPhotoBooth struct
+ *  Outputs:        TRUE to schedule the task again, FALSE otherwise
+ *  Routines Called: get_image_filename_pointer, sprintf, capture_hr_jpg,
+ *                  image_resize, g_idle_add, timer_start, gtk_widget_hide,
+ *                  gtk_widget_show
+ *
+ *****************************************************************************/
 gboolean take_photo_process (DigitalPhotoBooth *booth)
 {
     /* make sure a capture object exists */
     if (booth->capture != NULL)
     {
         /* create the filenames to be used for writing the images */
-        gchar *filename = get_image_filename_pointer (booth->num_photos_taken, FULL, booth);
-        gchar *filename_sm = get_image_filename_pointer (booth->num_photos_taken, SMALL, booth);
-        gchar *filename_lg = get_image_filename_pointer (booth->num_photos_taken, LARGE, booth);
+        gchar *filename =
+            get_image_filename_pointer (booth->num_photos_taken, FULL, booth);
+        gchar *filename_sm =
+            get_image_filename_pointer (booth->num_photos_taken, SMALL, booth);
+        gchar *filename_lg =
+            get_image_filename_pointer (booth->num_photos_taken, LARGE, booth);
 
         sprintf (filename, "img%04d.jpg", booth->num_photos_taken);
         sprintf (filename_sm, "img%04d_sm.jpg", booth->num_photos_taken);
@@ -337,6 +462,16 @@ gboolean take_photo_process (DigitalPhotoBooth *booth)
     return FALSE;
 }
 
+/******************************************************************************
+ *
+ *  Function:       on_take_photo_button_clicked
+ *  Description:    Callback function for the take_photo_button
+ *  Inputs:         button - a pointer to the button object
+ *                  booth - a pointer to the DigitalPhotoBooth struct
+ *  Outputs:        
+ *  Routines Called: gtk_widget_hide, gtk_widget_show, timer_start
+ *
+ *****************************************************************************/
 void on_take_photo_button_clicked (GtkWidget *button, DigitalPhotoBooth *booth)
 {
     /* hide the take photo button and show the progress bar */
@@ -347,6 +482,16 @@ void on_take_photo_button_clicked (GtkWidget *button, DigitalPhotoBooth *booth)
     timer_start(booth);
 }
 
+/******************************************************************************
+ *
+ *  Function:       timer_start
+ *  Description:    This function sets up and starts the countdown timer
+ *  Inputs:         booth - a pointer to the DigitalPhotoBooth struct
+ *  Outputs:        
+ *  Routines Called: gtk_progress_bar_set_fraction, sprintf,
+ *                  gtk_progress_bar_set_text, g_timeout_add_seconds
+ *
+ *****************************************************************************/
 void timer_start (DigitalPhotoBooth *booth)
 {
     /* initialize the timer fields */
@@ -367,6 +512,16 @@ void timer_start (DigitalPhotoBooth *booth)
         (GSourceFunc)timer_process, booth);
 }
 
+/******************************************************************************
+ *
+ *  Function:       timer_process
+ *  Description:    Callback function which processes each timer tick
+ *  Inputs:         booth - a pointer to the DigitalPhotoBooth struct
+ *  Outputs:        TRUE to schedule the task again, FALSE otherwise
+ *  Routines Called: gtk_progress_bar_set_fraction, sprintf, g_source_remove
+ *                  gtk_progress_bar_set_text, g_idle_add
+ *
+ *****************************************************************************/
 gboolean timer_process (DigitalPhotoBooth *booth)
 {
     /* set the progress bar to the current time left */
@@ -404,6 +559,19 @@ gboolean timer_process (DigitalPhotoBooth *booth)
     }
 }
 
+/******************************************************************************
+ *
+ *  Function:       on_take_photo_forward_button_clicked
+ *  Description:    Callback function for the take_photo_forward_button
+ *  Inputs:         button - a pointer to the button object
+ *                  booth - a pointer to the DigitalPhotoBooth struct
+ *  Outputs:        
+ *  Routines Called: g_source_remove, v4l2CaptureStopStreaming,
+ *                  gtk_widget_hide, gtk_widget_show,
+ *                  get_image_filename_pointer, gdk_pixbuf_new_from_file,
+ *                  gtk_image_set_from_pixbuf, gtk_notebook_next_page
+ *
+ *****************************************************************************/
 void on_take_photo_forward_button_clicked (GtkWidget *button,
     DigitalPhotoBooth *booth)
 {
@@ -423,20 +591,29 @@ void on_take_photo_forward_button_clicked (GtkWidget *button,
     gtk_widget_show (booth->take_photo_button);
     
     gchar *thumb1_filename = get_image_filename_pointer (0, SMALL, booth);
-    GdkPixbuf *thumb1_pixbuf = gdk_pixbuf_new_from_file (thumb1_filename, NULL);
-    gtk_image_set_from_pixbuf ((GtkImage*)booth->image1_preview_image, thumb1_pixbuf);
+    GdkPixbuf *thumb1_pixbuf =
+        gdk_pixbuf_new_from_file (thumb1_filename, NULL);
+    gtk_image_set_from_pixbuf ((GtkImage*)booth->preview_thumb1_image,
+        thumb1_pixbuf);
 
     gchar *thumb2_filename = get_image_filename_pointer (1, SMALL, booth);
-    GdkPixbuf *thumb2_pixbuf = gdk_pixbuf_new_from_file (thumb2_filename, NULL);
-    gtk_image_set_from_pixbuf ((GtkImage*)booth->image2_preview_image, thumb2_pixbuf);
+    GdkPixbuf *thumb2_pixbuf =
+        gdk_pixbuf_new_from_file (thumb2_filename, NULL);
+    gtk_image_set_from_pixbuf ((GtkImage*)booth->preview_thumb2_image,
+        thumb2_pixbuf);
 
     gchar *thumb3_filename = get_image_filename_pointer (2, SMALL, booth);
-    GdkPixbuf *thumb3_pixbuf = gdk_pixbuf_new_from_file (thumb3_filename, NULL);
-    gtk_image_set_from_pixbuf ((GtkImage*)booth->image3_preview_image, thumb3_pixbuf);
+    GdkPixbuf *thumb3_pixbuf =
+        gdk_pixbuf_new_from_file (thumb3_filename, NULL);
+    gtk_image_set_from_pixbuf ((GtkImage*)booth->preview_thumb3_image,
+        thumb3_pixbuf);
 
     gchar *preview_filename = get_image_filename_pointer (0, LARGE, booth);
-    GdkPixbuf *preview_pixbuf = gdk_pixbuf_new_from_file (preview_filename, NULL);
-    gtk_image_set_from_pixbuf ((GtkImage*)booth->image_preview_area, preview_pixbuf);
+    GdkPixbuf *preview_pixbuf =
+        gdk_pixbuf_new_from_file (preview_filename, NULL);
+    gtk_image_set_from_pixbuf ((GtkImage*)booth->preview_large_image,
+        preview_pixbuf);
+
     booth->selected_image_index = 0;
 
     gtk_notebook_next_page ((GtkNotebook*)booth->wizard_panel);
@@ -444,36 +621,87 @@ void on_take_photo_forward_button_clicked (GtkWidget *button,
 
 /* Functions for the third screen */
 
+/******************************************************************************
+ *
+ *  Function:       on_photo_select_forward_button_clicked
+ *  Description:    Callback function for the photo_select_forward_button
+ *  Inputs:         button - a pointer to the button object
+ *                  booth - a pointer to the DigitalPhotoBooth struct
+ *  Outputs:        
+ *  Routines Called: gtk_notebook_next_page
+ *
+ *****************************************************************************/
 void on_photo_select_forward_button_clicked (GtkWidget *button,
     DigitalPhotoBooth *booth)
 {
-    //GPid pid;
-    //printImage ("Img0000.jpg", &pid, NULL);
     gtk_notebook_next_page ((GtkNotebook*)booth->wizard_panel);
 }
 
+/******************************************************************************
+ *
+ *  Function:       update_preview_image
+ *  Description:    This function updates the larger preview image
+ *  Inputs:         booth - a pointer to the DigitalPhotoBooth struct
+ *  Outputs:        
+ *  Routines Called: get_image_filename_pointer, gdk_pixbuf_new_from_file,
+ *                  gtk_image_set_from_pixbuf
+ *
+ *****************************************************************************/
 void update_preview_image (DigitalPhotoBooth *booth)
 {
-    gchar *preview_filename = get_image_filename_pointer (booth->selected_image_index, LARGE, booth);
-    GdkPixbuf *preview_pixbuf = gdk_pixbuf_new_from_file (preview_filename, NULL);
-    gtk_image_set_from_pixbuf ((GtkImage*)booth->image_preview_area, preview_pixbuf);
+    gchar *preview_filename =
+        get_image_filename_pointer (booth->selected_image_index, LARGE, booth);
+    GdkPixbuf *preview_pixbuf =
+        gdk_pixbuf_new_from_file (preview_filename, NULL);
+    gtk_image_set_from_pixbuf ((GtkImage*)booth->preview_large_image,
+        preview_pixbuf);
 }
 
-void on_image1_preview_button_clicked (GtkWidget *button,
+/******************************************************************************
+ *
+ *  Function:       on_preview_thumb1_button_clicked
+ *  Description:    Callback function for the preview_thumb1_button
+ *  Inputs:         button - a pointer to the button object
+ *                  booth - a pointer to the DigitalPhotoBooth struct
+ *  Outputs:        
+ *  Routines Called: update_preview_image
+ *
+ *****************************************************************************/
+void on_preview_thumb1_button_clicked (GtkWidget *button,
     DigitalPhotoBooth *booth)
 {
     booth->selected_image_index = 0;
     update_preview_image (booth);
 }
 
-void on_image2_preview_button_clicked (GtkWidget *button,
+/******************************************************************************
+ *
+ *  Function:       on_preview_thumb2_button_clicked
+ *  Description:    Callback function for the preview_thumb2_button
+ *  Inputs:         button - a pointer to the button object
+ *                  booth - a pointer to the DigitalPhotoBooth struct
+ *  Outputs:        
+ *  Routines Called: update_preview_image
+ *
+ *****************************************************************************/
+void on_preview_thumb2_button_clicked (GtkWidget *button,
     DigitalPhotoBooth *booth)
 {
     booth->selected_image_index = 1;
     update_preview_image (booth);
 }
 
-void on_image3_preview_button_clicked (GtkWidget *button,
+/******************************************************************************
+ *
+ *  Function:       on_preview_thumb3_button_clicked
+ *  Description:    Callback function for the preview_thumb3_button
+ *  Inputs:         button - a pointer to the button object
+ *                  booth - a pointer to the DigitalPhotoBooth struct
+ *  Outputs:        
+ *  Routines Called: update_preview_image
+ *
+ *****************************************************************************/
+void on_preview_thumb3_button_clicked (GtkWidget *button,
     DigitalPhotoBooth *booth)
 {
     booth->selected_image_index = 2;
