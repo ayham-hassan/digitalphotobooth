@@ -123,7 +123,15 @@ gboolean init_app (DigitalPhotoBooth *booth)
     booth->preview_thumb3_image =
         GTK_WIDGET (gtk_builder_get_object (builder, "preview_thumb3_image"));
     booth->preview_large_image =
-        GTK_WIDGET (gtk_builder_get_object (builder, "preview_large_image"));
+        GTK_WIDGET (gtk_builder_get_object (builder, "preview_large_image"));    
+    booth->effects_thumb1_image =
+        GTK_WIDGET (gtk_builder_get_object (builder, "effects_thumb1_image"));
+    booth->effects_thumb2_image =
+        GTK_WIDGET (gtk_builder_get_object (builder, "effects_thumb2_image"));
+    booth->effects_thumb3_image =
+        GTK_WIDGET (gtk_builder_get_object (builder, "effects_thumb3_image"));
+    booth->effects_large_image =
+        GTK_WIDGET (gtk_builder_get_object (builder, "effects_large_image"));
     
     /* setup money handler variables */
     booth->money_total = 4;
@@ -142,7 +150,7 @@ gboolean init_app (DigitalPhotoBooth *booth)
 	
 	booth->selected_image_index = 0;
 	
-	memset (booth->photos_filenames, 0, NUM_PHOTOS * NUM_PHOTO_TYPES * MAX_STRING_LENGTH);
+	memset (booth->photos_filenames, 0, NUM_PHOTOS * NUM_PHOTO_STYLES * NUM_PHOTO_SIZES * MAX_STRING_LENGTH);
     
     /* connect signals, passing our DigitalPhotoBooth struct as user data */
     gtk_builder_connect_signals (builder, booth);
@@ -190,35 +198,6 @@ void on_window_destroy (GtkObject *object, DigitalPhotoBooth *booth)
     gtk_main_quit();
 }
 
-/* General utility functions */
-
-/******************************************************************************
- *
- *  Function:       get_image_filename_pointer
- *  Description:    This function returns a pointer to the requested filename
- *                  string.
- *  Inputs:         index - the index of the image
- *                  pt - the image type requested
- *                  booth - a pointer to the DigitalPhotoBooth struct
- *  Outputs:        a pointer to the requested string
- *  Routines Called: 
- *
- *****************************************************************************/
-gchar* get_image_filename_pointer (guint index, enum PHOTO_TYPE pt,
-    DigitalPhotoBooth *booth)
-{
-    if (index < NUM_PHOTOS)
-    {
-        return booth->photos_filenames[index * NUM_PHOTO_TYPES + pt];
-    }
-    else
-    {
-        return NULL;
-    }
-}
-
-/* Functions for the first screen */
-
 /******************************************************************************
  *
  *  Function:       on_window_key_press_event
@@ -255,6 +234,36 @@ gboolean on_window_key_press_event (GtkWidget *window, GdkEventKey *event,
 
     return FALSE;
 }
+
+
+/* General utility functions */
+
+/******************************************************************************
+ *
+ *  Function:       get_image_filename_pointer
+ *  Description:    This function returns a pointer to the requested filename
+ *                  string.
+ *  Inputs:         index - the index of the image
+ *                  pt - the image type requested
+ *                  booth - a pointer to the DigitalPhotoBooth struct
+ *  Outputs:        a pointer to the requested string
+ *  Routines Called: 
+ *
+ *****************************************************************************/
+gchar* get_image_filename_pointer (guint index, enum PHOTO_STYLE pstyle,
+    enum PHOTO_SIZE psize, DigitalPhotoBooth *booth)
+{
+    if (index < NUM_PHOTOS && pstyle < NUM_PHOTO_STYLES && psize < NUM_PHOTO_SIZES)
+    {
+        return booth->photos_filenames[index * NUM_PHOTO_STYLES * NUM_PHOTO_SIZES + pstyle + psize];
+    }
+    else
+    {
+        return NULL;
+    }
+}
+
+/* Functions for the first screen */
 
 /******************************************************************************
  *
@@ -420,11 +429,11 @@ gboolean take_photo_process (DigitalPhotoBooth *booth)
     {
         /* create the filenames to be used for writing the images */
         gchar *filename =
-            get_image_filename_pointer (booth->num_photos_taken, FULL, booth);
+            get_image_filename_pointer (booth->num_photos_taken, NONE, FULL, booth);
         gchar *filename_sm =
-            get_image_filename_pointer (booth->num_photos_taken, SMALL, booth);
+            get_image_filename_pointer (booth->num_photos_taken, NONE, SMALL, booth);
         gchar *filename_lg =
-            get_image_filename_pointer (booth->num_photos_taken, LARGE, booth);
+            get_image_filename_pointer (booth->num_photos_taken, NONE, LARGE, booth);
 
         sprintf (filename, "img%04d.jpg", booth->num_photos_taken);
         sprintf (filename_sm, "img%04d_sm.jpg", booth->num_photos_taken);
@@ -590,25 +599,25 @@ void on_take_photo_forward_button_clicked (GtkWidget *button,
     gtk_widget_hide (booth->take_photo_forward_button);
     gtk_widget_show (booth->take_photo_button);
     
-    gchar *thumb1_filename = get_image_filename_pointer (0, SMALL, booth);
+    gchar *thumb1_filename = get_image_filename_pointer (0, NONE, SMALL, booth);
     GdkPixbuf *thumb1_pixbuf =
         gdk_pixbuf_new_from_file (thumb1_filename, NULL);
     gtk_image_set_from_pixbuf ((GtkImage*)booth->preview_thumb1_image,
         thumb1_pixbuf);
 
-    gchar *thumb2_filename = get_image_filename_pointer (1, SMALL, booth);
+    gchar *thumb2_filename = get_image_filename_pointer (1, NONE, SMALL, booth);
     GdkPixbuf *thumb2_pixbuf =
         gdk_pixbuf_new_from_file (thumb2_filename, NULL);
     gtk_image_set_from_pixbuf ((GtkImage*)booth->preview_thumb2_image,
         thumb2_pixbuf);
 
-    gchar *thumb3_filename = get_image_filename_pointer (2, SMALL, booth);
+    gchar *thumb3_filename = get_image_filename_pointer (2, NONE, SMALL, booth);
     GdkPixbuf *thumb3_pixbuf =
         gdk_pixbuf_new_from_file (thumb3_filename, NULL);
     gtk_image_set_from_pixbuf ((GtkImage*)booth->preview_thumb3_image,
         thumb3_pixbuf);
 
-    gchar *preview_filename = get_image_filename_pointer (0, LARGE, booth);
+    gchar *preview_filename = get_image_filename_pointer (0, NONE, LARGE, booth);
     GdkPixbuf *preview_pixbuf =
         gdk_pixbuf_new_from_file (preview_filename, NULL);
     gtk_image_set_from_pixbuf ((GtkImage*)booth->preview_large_image,
@@ -634,6 +643,30 @@ void on_take_photo_forward_button_clicked (GtkWidget *button,
 void on_photo_select_forward_button_clicked (GtkWidget *button,
     DigitalPhotoBooth *booth)
 {
+    gchar *thumb1_filename = get_image_filename_pointer (0, NONE, SMALL, booth);
+    GdkPixbuf *thumb1_pixbuf =
+        gdk_pixbuf_new_from_file (thumb1_filename, NULL);
+    gtk_image_set_from_pixbuf ((GtkImage*)booth->effects_thumb1_image,
+        thumb1_pixbuf);
+
+    gchar *thumb2_filename = get_image_filename_pointer (1, NONE, SMALL, booth);
+    GdkPixbuf *thumb2_pixbuf =
+        gdk_pixbuf_new_from_file (thumb2_filename, NULL);
+    gtk_image_set_from_pixbuf ((GtkImage*)booth->effects_thumb2_image,
+        thumb2_pixbuf);
+
+    gchar *thumb3_filename = get_image_filename_pointer (2, NONE, SMALL, booth);
+    GdkPixbuf *thumb3_pixbuf =
+        gdk_pixbuf_new_from_file (thumb3_filename, NULL);
+    gtk_image_set_from_pixbuf ((GtkImage*)booth->effects_thumb3_image,
+        thumb3_pixbuf);
+
+    gchar *effects_filename = get_image_filename_pointer (0, NONE, LARGE, booth);
+    GdkPixbuf *effects_pixbuf =
+        gdk_pixbuf_new_from_file (effects_filename, NULL);
+    gtk_image_set_from_pixbuf ((GtkImage*)booth->effects_large_image,
+        effects_pixbuf);
+
     gtk_notebook_next_page ((GtkNotebook*)booth->wizard_panel);
 }
 
@@ -650,7 +683,7 @@ void on_photo_select_forward_button_clicked (GtkWidget *button,
 void update_preview_image (DigitalPhotoBooth *booth)
 {
     gchar *preview_filename =
-        get_image_filename_pointer (booth->selected_image_index, LARGE, booth);
+        get_image_filename_pointer (booth->selected_image_index, NONE, LARGE, booth);
     GdkPixbuf *preview_pixbuf =
         gdk_pixbuf_new_from_file (preview_filename, NULL);
     gtk_image_set_from_pixbuf ((GtkImage*)booth->preview_large_image,
@@ -706,5 +739,103 @@ void on_preview_thumb3_button_clicked (GtkWidget *button,
 {
     booth->selected_image_index = 2;
     update_preview_image (booth);
+}
+
+
+/* Functions for the fourth screen */
+
+/******************************************************************************
+ *
+ *  Function:       on_effects_select_forward_button_clicked
+ *  Description:    Callback function for the effects_select_forward_button
+ *  Inputs:         button - a pointer to the button object
+ *                  booth - a pointer to the DigitalPhotoBooth struct
+ *  Outputs:        
+ *  Routines Called: gtk_notebook_next_page
+ *
+ *****************************************************************************/
+void on_effects_select_forward_button_clicked (GtkWidget *button,
+    DigitalPhotoBooth *booth)
+{
+
+}
+
+/******************************************************************************
+ *
+ *  Function:       update_effects_image
+ *  Description:    This function updates the larger effects image
+ *  Inputs:         booth - a pointer to the DigitalPhotoBooth struct
+ *  Outputs:        
+ *  Routines Called: get_image_filename_pointer, gdk_pixbuf_new_from_file,
+ *                  gtk_image_set_from_pixbuf
+ *
+ *****************************************************************************/
+void update_effects_image (DigitalPhotoBooth *booth)
+{
+
+}
+
+/******************************************************************************
+ *
+ *  Function:       on_effects_thumb1_button_clicked
+ *  Description:    Callback function for the effects_thumb1_button
+ *  Inputs:         button - a pointer to the button object
+ *                  booth - a pointer to the DigitalPhotoBooth struct
+ *  Outputs:        
+ *  Routines Called: update_effects_image
+ *
+ *****************************************************************************/
+void on_effects_thumb1_button_clicked (GtkWidget *button,
+    DigitalPhotoBooth *booth)
+{
+
+}
+
+/******************************************************************************
+ *
+ *  Function:       on_effects_thumb2_button_clicked
+ *  Description:    Callback function for the effects_thumb2_button
+ *  Inputs:         button - a pointer to the button object
+ *                  booth - a pointer to the DigitalPhotoBooth struct
+ *  Outputs:        
+ *  Routines Called: update_effects_image
+ *
+ *****************************************************************************/
+void on_effects_thumb2_button_clicked (GtkWidget *button,
+    DigitalPhotoBooth *booth)
+{
+
+}
+
+/******************************************************************************
+ *
+ *  Function:       on_effects_thumb3_button_clicked
+ *  Description:    Callback function for the effects_thumb3_button
+ *  Inputs:         button - a pointer to the button object
+ *                  booth - a pointer to the DigitalPhotoBooth struct
+ *  Outputs:        
+ *  Routines Called: update_effects_image
+ *
+ *****************************************************************************/
+void on_effects_thumb3_button_clicked (GtkWidget *button,
+    DigitalPhotoBooth *booth)
+{
+
+}
+
+/******************************************************************************
+ *
+ *  Function:       on_effects_none_button_clicked
+ *  Description:    Callback function for the effects_none_button
+ *  Inputs:         button - a pointer to the button object
+ *                  booth - a pointer to the DigitalPhotoBooth struct
+ *  Outputs:        
+ *  Routines Called: update_effects_image
+ *
+ *****************************************************************************/
+void on_effects_none_button_clicked (GtkWidget *button,
+    DigitalPhotoBooth *booth)
+{
+
 }
 
