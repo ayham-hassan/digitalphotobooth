@@ -11,23 +11,23 @@
 
 #define TIMER_PHOTO_SECONDS 3
 #define NUM_PHOTOS 3
-#define NUM_PHOTO_TYPES 12
+#define NUM_PHOTO_STYLES 4
+#define NUM_PHOTO_SIZES 3
 #define MAX_STRING_LENGTH 256
 
-enum PHOTO_TYPE
+enum PHOTO_STYLE
+{
+    NONE,
+    OILBLOB,
+    CHARCOAL,
+    TEXTURE
+};
+
+enum PHOTO_SIZE
 {
     FULL,
     SMALL,
-    LARGE,
-    OILBLOB_FULL,
-    OILBLOB_SMALL,
-    OILBLOB_LARGE,
-    CHARCOAL_FULL,
-    CHARCOAL_SMALL,
-    CHARCOAL_LARGE,
-    TEXTURE_FULL,
-    TEXTURE_SMALL,
-    TEXTURE_LARGE
+    LARGE
 };
 
 typedef struct
@@ -65,9 +65,16 @@ typedef struct
     GtkWidget *preview_large_image;
     guint selected_image_index;
     
+    /* fourth panel - photo selection */
+    GtkWidget *effects_thumb1_image;
+    GtkWidget *effects_thumb2_image;
+    GtkWidget *effects_thumb3_image;
+    GtkWidget *effects_large_image;
+    
     /* filename variables */
-    gchar photos_filenames[NUM_PHOTOS*NUM_PHOTO_TYPES][MAX_STRING_LENGTH];
+    gchar photos_filenames[NUM_PHOTOS * NUM_PHOTO_STYLES * NUM_PHOTO_SIZES][MAX_STRING_LENGTH];
 } DigitalPhotoBooth;
+
 
 /******************************************************************************
  *
@@ -109,21 +116,6 @@ void on_window_destroy (GtkObject *object, DigitalPhotoBooth *booth);
 
 /******************************************************************************
  *
- *  Function:       get_image_filename_pointer
- *  Description:    This function returns a pointer to the requested filename
- *                  string.
- *  Inputs:         index - the index of the image
- *                  pt - the image type requested
- *                  booth - a pointer to the DigitalPhotoBooth struct
- *  Outputs:        a pointer to the requested string
- *  Routines Called: 
- *
- *****************************************************************************/
-gchar* get_image_filename_pointer (guint index, enum PHOTO_TYPE pt,
-    DigitalPhotoBooth *booth);
-
-/******************************************************************************
- *
  *  Function:       on_window_key_press_event
  *  Description:    Callback function for window key press events
  *  Inputs:         windows - a pointer to the window object
@@ -135,6 +127,27 @@ gchar* get_image_filename_pointer (guint index, enum PHOTO_TYPE pt,
  *****************************************************************************/
 gboolean on_window_key_press_event (GtkWidget *window, GdkEventKey *event,
     DigitalPhotoBooth *booth);
+
+
+/* General utility functions */
+
+/******************************************************************************
+ *
+ *  Function:       get_image_filename_pointer
+ *  Description:    This function returns a pointer to the requested filename
+ *                  string.
+ *  Inputs:         index - the index of the image
+ *                  pt - the image type requested
+ *                  booth - a pointer to the DigitalPhotoBooth struct
+ *  Outputs:        a pointer to the requested string
+ *  Routines Called: 
+ *
+ *****************************************************************************/
+gchar* get_image_filename_pointer (guint index, enum PHOTO_STYLE pstyle,
+    enum PHOTO_SIZE psize, DigitalPhotoBooth *booth);
+
+
+/* Functions for the first screen */
 
 /******************************************************************************
  *
@@ -172,7 +185,10 @@ void money_update (DigitalPhotoBooth *booth);
 void on_money_forward_button_clicked (GtkWidget *button,
     DigitalPhotoBooth *booth);
     
-    /******************************************************************************
+
+/* Functions for the second screen */
+
+/******************************************************************************
  *
  *  Function:       free_frame
  *  Description:    Callback function for freeing frame data.
@@ -251,6 +267,25 @@ gboolean timer_process (DigitalPhotoBooth *booth);
 
 /******************************************************************************
  *
+ *  Function:       on_take_photo_forward_button_clicked
+ *  Description:    Callback function for the take_photo_forward_button
+ *  Inputs:         button - a pointer to the button object
+ *                  booth - a pointer to the DigitalPhotoBooth struct
+ *  Outputs:        
+ *  Routines Called: g_source_remove, v4l2CaptureStopStreaming,
+ *                  gtk_widget_hide, gtk_widget_show,
+ *                  get_image_filename_pointer, gdk_pixbuf_new_from_file,
+ *                  gtk_image_set_from_pixbuf, gtk_notebook_next_page
+ *
+ *****************************************************************************/
+void on_take_photo_forward_button_clicked (GtkWidget *button,
+    DigitalPhotoBooth *booth);
+    
+
+/* Functions for the third screen */
+
+/******************************************************************************
+ *
  *  Function:       on_photo_select_forward_button_clicked
  *  Description:    Callback function for the photo_select_forward_button
  *  Inputs:         button - a pointer to the button object
@@ -311,6 +346,86 @@ void on_preview_thumb2_button_clicked (GtkWidget *button,
  *
  *****************************************************************************/
 void on_preview_thumb3_button_clicked (GtkWidget *button,
+    DigitalPhotoBooth *booth);
+
+
+/* Functions for the fourth screen */
+
+/******************************************************************************
+ *
+ *  Function:       on_effects_select_forward_button_clicked
+ *  Description:    Callback function for the effects_select_forward_button
+ *  Inputs:         button - a pointer to the button object
+ *                  booth - a pointer to the DigitalPhotoBooth struct
+ *  Outputs:        
+ *  Routines Called: gtk_notebook_next_page
+ *
+ *****************************************************************************/
+void on_effects_select_forward_button_clicked (GtkWidget *button,
+    DigitalPhotoBooth *booth);
+
+/******************************************************************************
+ *
+ *  Function:       update_effects_image
+ *  Description:    This function updates the larger effects image
+ *  Inputs:         booth - a pointer to the DigitalPhotoBooth struct
+ *  Outputs:        
+ *  Routines Called: get_image_filename_pointer, gdk_pixbuf_new_from_file,
+ *                  gtk_image_set_from_pixbuf
+ *
+ *****************************************************************************/
+void update_effects_image (DigitalPhotoBooth *booth);
+
+/******************************************************************************
+ *
+ *  Function:       on_effects_thumb1_button_clicked
+ *  Description:    Callback function for the effects_thumb1_button
+ *  Inputs:         button - a pointer to the button object
+ *                  booth - a pointer to the DigitalPhotoBooth struct
+ *  Outputs:        
+ *  Routines Called: update_effects_image
+ *
+ *****************************************************************************/
+void on_effects_thumb1_button_clicked (GtkWidget *button,
+    DigitalPhotoBooth *booth);
+
+/******************************************************************************
+ *
+ *  Function:       on_effects_thumb2_button_clicked
+ *  Description:    Callback function for the effects_thumb2_button
+ *  Inputs:         button - a pointer to the button object
+ *                  booth - a pointer to the DigitalPhotoBooth struct
+ *  Outputs:        
+ *  Routines Called: update_effects_image
+ *
+ *****************************************************************************/
+void on_effects_thumb2_button_clicked (GtkWidget *button,
+    DigitalPhotoBooth *booth);
+
+/******************************************************************************
+ *
+ *  Function:       on_effects_thumb3_button_clicked
+ *  Description:    Callback function for the effects_thumb3_button
+ *  Inputs:         button - a pointer to the button object
+ *                  booth - a pointer to the DigitalPhotoBooth struct
+ *  Outputs:        
+ *  Routines Called: update_effects_image
+ *
+ *****************************************************************************/
+void on_effects_thumb3_button_clicked (GtkWidget *button,
+    DigitalPhotoBooth *booth);
+    
+/******************************************************************************
+ *
+ *  Function:       on_effects_none_button_clicked
+ *  Description:    Callback function for the effects_none_button
+ *  Inputs:         button - a pointer to the button object
+ *                  booth - a pointer to the DigitalPhotoBooth struct
+ *  Outputs:        
+ *  Routines Called: update_effects_image
+ *
+ *****************************************************************************/
+void on_effects_none_button_clicked (GtkWidget *button,
     DigitalPhotoBooth *booth);
 
 #endif

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE glade-interface SYSTEM "glade-2.0.dtd">
-<!--Generated with glade3 3.4.0 on Mon Apr 28 11:39:27 2008 -->
+<!--Generated with glade3 3.4.0 on Mon Apr 28 15:33:24 2008 -->
 <glade-interface>
   <widget class="GtkWindow" id="window">
     <property name="width_request">1024</property>
@@ -538,14 +538,15 @@ When the image you want to keep is shown in the preview area, click "Forward" to
                           </widget>
                         </child>
                         <child>
-                          <widget class="GtkButton" id="image1_preview_button2">
+                          <widget class="GtkButton" id="effects_thumb1_button">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
                             <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
                             <property name="response_id">0</property>
+                            <signal name="clicked" handler="on_effects_thumb1_button_clicked"/>
                             <child>
-                              <widget class="GtkImage" id="image1_preview_image2">
+                              <widget class="GtkImage" id="effects_thumb1_image">
                                 <property name="width_request">160</property>
                                 <property name="visible">True</property>
                                 <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
@@ -560,14 +561,15 @@ When the image you want to keep is shown in the preview area, click "Forward" to
                           </packing>
                         </child>
                         <child>
-                          <widget class="GtkButton" id="image2_preview_button2">
+                          <widget class="GtkButton" id="effects_thumb2_button">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
                             <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
                             <property name="response_id">0</property>
+                            <signal name="clicked" handler="on_effects_thumb2_button_clicked"/>
                             <child>
-                              <widget class="GtkImage" id="image2_preview_image2">
+                              <widget class="GtkImage" id="effects_thumb2_image">
                                 <property name="width_request">160</property>
                                 <property name="visible">True</property>
                                 <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
@@ -582,14 +584,15 @@ When the image you want to keep is shown in the preview area, click "Forward" to
                           </packing>
                         </child>
                         <child>
-                          <widget class="GtkButton" id="image3_preview_button2">
+                          <widget class="GtkButton" id="effects_thumb3_button">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
                             <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
                             <property name="response_id">0</property>
+                            <signal name="clicked" handler="on_effects_thumb3_button_clicked"/>
                             <child>
-                              <widget class="GtkImage" id="image3_preview_image2">
+                              <widget class="GtkImage" id="effects_thumb3_image">
                                 <property name="width_request">160</property>
                                 <property name="visible">True</property>
                                 <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
@@ -604,12 +607,28 @@ When the image you want to keep is shown in the preview area, click "Forward" to
                           </packing>
                         </child>
                         <child>
+                          <widget class="GtkButton" id="effects_none_button">
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="receives_default">True</property>
+                            <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
+                            <property name="label" translatable="yes">No Effects</property>
+                            <property name="response_id">0</property>
+                            <signal name="clicked" handler="on_effects_none_button_clicked"/>
+                          </widget>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="padding">10</property>
+                            <property name="position">4</property>
+                          </packing>
+                        </child>
+                        <child>
                           <widget class="GtkFixed" id="fixed27">
                             <property name="visible">True</property>
                             <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
                           </widget>
                           <packing>
-                            <property name="position">4</property>
+                            <property name="position">5</property>
                           </packing>
                         </child>
                       </widget>
@@ -632,7 +651,7 @@ When the image you want to keep is shown in the preview area, click "Forward" to
                           </widget>
                         </child>
                         <child>
-                          <widget class="GtkImage" id="image_preview_area2">
+                          <widget class="GtkImage" id="effects_large_image">
                             <property name="width_request">640</property>
                             <property name="height_request">480</property>
                             <property name="visible">True</property>
@@ -700,7 +719,7 @@ When the image you want to keep is shown in the preview area, click "Forward" to
                   </widget>
                 </child>
                 <child>
-                  <widget class="GtkButton" id="photo_select_forward_button2">
+                  <widget class="GtkButton" id="effects_select_forward_button">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
@@ -708,6 +727,7 @@ When the image you want to keep is shown in the preview area, click "Forward" to
                     <property name="label" translatable="yes">gtk-go-forward</property>
                     <property name="use_stock">True</property>
                     <property name="response_id">0</property>
+                    <signal name="clicked" handler="on_effects_select_forward_button_clicked"/>
                   </widget>
                   <packing>
                     <property name="position">1</property>
