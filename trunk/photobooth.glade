@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE glade-interface SYSTEM "glade-2.0.dtd">
-<!--Generated with glade3 3.4.0 on Mon Apr 28 15:33:24 2008 -->
+<!--Generated with glade3 3.4.0 on Mon Apr 28 17:31:00 2008 -->
 <glade-interface>
   <widget class="GtkWindow" id="window">
     <property name="width_request">1024</property>
@@ -548,6 +548,7 @@ When the image you want to keep is shown in the preview area, click "Forward" to
                             <child>
                               <widget class="GtkImage" id="effects_thumb1_image">
                                 <property name="width_request">160</property>
+                                <property name="height_request">120</property>
                                 <property name="visible">True</property>
                                 <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
                                 <property name="stock">gtk-missing-image</property>
@@ -571,6 +572,7 @@ When the image you want to keep is shown in the preview area, click "Forward" to
                             <child>
                               <widget class="GtkImage" id="effects_thumb2_image">
                                 <property name="width_request">160</property>
+                                <property name="height_request">120</property>
                                 <property name="visible">True</property>
                                 <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
                                 <property name="stock">gtk-missing-image</property>
@@ -594,6 +596,7 @@ When the image you want to keep is shown in the preview area, click "Forward" to
                             <child>
                               <widget class="GtkImage" id="effects_thumb3_image">
                                 <property name="width_request">160</property>
+                                <property name="height_request">120</property>
                                 <property name="visible">True</property>
                                 <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
                                 <property name="stock">gtk-missing-image</property>

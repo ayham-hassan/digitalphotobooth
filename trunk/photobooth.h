@@ -70,6 +70,7 @@ typedef struct
     GtkWidget *effects_thumb2_image;
     GtkWidget *effects_thumb3_image;
     GtkWidget *effects_large_image;
+    enum PHOTO_STYLE selected_effect_enum;
     
     /* filename variables */
     gchar photos_filenames[NUM_PHOTOS * NUM_PHOTO_STYLES * NUM_PHOTO_SIZES][MAX_STRING_LENGTH];
@@ -363,6 +364,8 @@ void on_preview_thumb3_button_clicked (GtkWidget *button,
  *****************************************************************************/
 void on_effects_select_forward_button_clicked (GtkWidget *button,
     DigitalPhotoBooth *booth);
+
+void oilblob_complete (GPid pid, gint status, DigitalPhotoBooth *booth );
 
 /******************************************************************************
  *
