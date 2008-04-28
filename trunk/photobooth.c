@@ -164,7 +164,14 @@ void on_window_destroy (GtkObject *object, DigitalPhotoBooth *booth)
 /* General utility functions */
 gchar* get_image_filename_pointer (guint index, enum PHOTO_TYPE pt, DigitalPhotoBooth *booth)
 {
-    return booth->photos_filenames[index * NUM_PHOTO_TYPES + pt];
+    if (index < NUM_PHOTOS)
+    {
+        return booth->photos_filenames[index * NUM_PHOTO_TYPES + pt];
+    }
+    else
+    {
+        return NULL;
+    }
 }
 
 /* Functions for the first screen */
@@ -234,10 +241,15 @@ void on_money_forward_button_clicked (GtkWidget *button,
     {
         /* open the camera */
         booth->capture = open_camera();
-        
+    }
+    
+    if (booth->capture != NULL)
+    {
         /* start the video stream */
         v4l2CaptureStartStreaming (booth->capture, 0, 4);
     }
+    
+    booth->num_photos_taken = 0;
 	
 	/* start a idle source which updates the drawing area */
     booth->video_source_id = g_idle_add ((GSourceFunc)camera_process, booth);
@@ -300,13 +312,13 @@ gboolean take_photo_process (DigitalPhotoBooth *booth)
         image_resize (filename, filename_sm, "160x120", NULL);
         image_resize (filename, filename_lg, "640x480", NULL);
         
+        /* create an idle source which updates the drawing area */
+        booth->video_source_id = g_idle_add ((GSourceFunc)camera_process,
+            booth);
+        
         /* pre-increment num_photos_taken */
         if (++booth->num_photos_taken < NUM_PHOTOS)
-        {
-            /* create an idle source which updates the drawing area */
-            booth->video_source_id = g_idle_add ((GSourceFunc)camera_process,
-                booth);
-            
+        {            
             /* show the take photo button and hide the progress bar */
             //gtk_widget_show (booth->take_photo_button);
             //gtk_widget_hide (booth->take_photo_progress);
@@ -395,11 +407,25 @@ gboolean timer_process (DigitalPhotoBooth *booth)
 void on_take_photo_forward_button_clicked (GtkWidget *button,
     DigitalPhotoBooth *booth)
 {
+    /* stop the video from updating */
+    if (booth->video_source_id != 0)
+    {
+        g_source_remove(booth->video_source_id);
+        booth->video_source_id = 0;
+    }
+
+    if (booth->capture != NULL)
+    {
+        v4l2CaptureStopStreaming (booth->capture);
+    }
+    
+    gtk_widget_hide (booth->take_photo_forward_button);
+    gtk_widget_show (booth->take_photo_button);
+    
     gchar *thumb1_filename = get_image_filename_pointer (0, SMALL, booth);
     GdkPixbuf *thumb1_pixbuf = gdk_pixbuf_new_from_file (thumb1_filename, NULL);
     gtk_image_set_from_pixbuf ((GtkImage*)booth->image1_preview_image, thumb1_pixbuf);
-    
-    
+
     gchar *thumb2_filename = get_image_filename_pointer (1, SMALL, booth);
     GdkPixbuf *thumb2_pixbuf = gdk_pixbuf_new_from_file (thumb2_filename, NULL);
     gtk_image_set_from_pixbuf ((GtkImage*)booth->image2_preview_image, thumb2_pixbuf);
@@ -421,9 +447,9 @@ void on_take_photo_forward_button_clicked (GtkWidget *button,
 void on_photo_select_forward_button_clicked (GtkWidget *button,
     DigitalPhotoBooth *booth)
 {
-    GPid pid;
-    printImage ("Img0000.jpg", &pid, NULL);
-    
+    //GPid pid;
+    //printImage ("Img0000.jpg", &pid, NULL);
+    gtk_notebook_next_page ((GtkNotebook*)booth->wizard_panel);
 }
 
 void update_preview_image (DigitalPhotoBooth *booth)
