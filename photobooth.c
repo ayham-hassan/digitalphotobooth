@@ -111,7 +111,8 @@ gboolean init_app (DigitalPhotoBooth *booth)
     booth->take_photo_button =
         GTK_WIDGET (gtk_builder_get_object (builder, "take_photo_button"));
     booth->take_photo_forward_button =
-        GTK_WIDGET (gtk_builder_get_object (builder, "take_photo_forward_button"));
+        GTK_WIDGET (gtk_builder_get_object (builder, 
+        "take_photo_forward_button"));
     booth->take_photo_progress =
         GTK_WIDGET (gtk_builder_get_object (builder, "take_photo_progress"));
     booth->videobox =
@@ -149,8 +150,10 @@ gboolean init_app (DigitalPhotoBooth *booth)
 	booth->timer_source_id = 0;
 	
 	booth->selected_image_index = 0;
+	booth->selected_effect_enum = NONE;
 	
-	memset (booth->photos_filenames, 0, NUM_PHOTOS * NUM_PHOTO_STYLES * NUM_PHOTO_SIZES * MAX_STRING_LENGTH);
+	memset (booth->photos_filenames, 0,
+	    NUM_PHOTOS * NUM_PHOTO_STYLES * NUM_PHOTO_SIZES * MAX_STRING_LENGTH);
     
     /* connect signals, passing our DigitalPhotoBooth struct as user data */
     gtk_builder_connect_signals (builder, booth);
@@ -253,15 +256,17 @@ gboolean on_window_key_press_event (GtkWidget *window, GdkEventKey *event,
 gchar* get_image_filename_pointer (guint index, enum PHOTO_STYLE pstyle,
     enum PHOTO_SIZE psize, DigitalPhotoBooth *booth)
 {
-    if (index < NUM_PHOTOS && pstyle < NUM_PHOTO_STYLES && psize < NUM_PHOTO_SIZES)
+    if (index < NUM_PHOTOS && pstyle < NUM_PHOTO_STYLES
+        && psize < NUM_PHOTO_SIZES)
     {
-        return booth->photos_filenames[index * NUM_PHOTO_STYLES * NUM_PHOTO_SIZES + pstyle + psize];
+        return booth->photos_filenames[index * NUM_PHOTO_STYLES * NUM_PHOTO_SIZES + pstyle * NUM_PHOTO_SIZES + psize];
     }
     else
     {
         return NULL;
     }
 }
+
 
 /* Functions for the first screen */
 
@@ -351,6 +356,7 @@ void on_money_forward_button_clicked (GtkWidget *button,
     booth->video_source_id = g_idle_add ((GSourceFunc)camera_process, booth);
 }
 
+
 /* Functions for the second screen */
 
 /******************************************************************************
@@ -409,7 +415,6 @@ gboolean camera_process (DigitalPhotoBooth *booth)
     return TRUE;
 }
 
-
 /******************************************************************************
  *
  *  Function:       take_photo_process
@@ -429,11 +434,14 @@ gboolean take_photo_process (DigitalPhotoBooth *booth)
     {
         /* create the filenames to be used for writing the images */
         gchar *filename =
-            get_image_filename_pointer (booth->num_photos_taken, NONE, FULL, booth);
+            get_image_filename_pointer (booth->num_photos_taken, NONE, FULL,
+            booth);
         gchar *filename_sm =
-            get_image_filename_pointer (booth->num_photos_taken, NONE, SMALL, booth);
+            get_image_filename_pointer (booth->num_photos_taken, NONE, SMALL,
+            booth);
         gchar *filename_lg =
-            get_image_filename_pointer (booth->num_photos_taken, NONE, LARGE, booth);
+            get_image_filename_pointer (booth->num_photos_taken, NONE, LARGE,
+            booth);
 
         sprintf (filename, "img%04d.jpg", booth->num_photos_taken);
         sprintf (filename_sm, "img%04d_sm.jpg", booth->num_photos_taken);
@@ -541,7 +549,8 @@ gboolean timer_process (DigitalPhotoBooth *booth)
     /* if the timer hasn't expired, continue the timeout schedule */
     if (booth->timer_left > 0)
     {
-        sprintf (booth->progress_bar_label, "The photo will be taken in %d seconds",
+        sprintf (booth->progress_bar_label,
+            "The photo will be taken in %d seconds",
             booth->timer_left);
         gtk_progress_bar_set_text ((GtkProgressBar*)booth->take_photo_progress,
             booth->progress_bar_label);
@@ -549,7 +558,8 @@ gboolean timer_process (DigitalPhotoBooth *booth)
     }
     else
     {
-        sprintf (booth->progress_bar_label, "Please don't move, the photo is being captured");
+        sprintf (booth->progress_bar_label, 
+            "Please don't move, the photo is being captured");
         gtk_progress_bar_set_text ((GtkProgressBar*)booth->take_photo_progress,
             booth->progress_bar_label);
 
@@ -599,25 +609,29 @@ void on_take_photo_forward_button_clicked (GtkWidget *button,
     gtk_widget_hide (booth->take_photo_forward_button);
     gtk_widget_show (booth->take_photo_button);
     
-    gchar *thumb1_filename = get_image_filename_pointer (0, NONE, SMALL, booth);
+    gchar *thumb1_filename =
+        get_image_filename_pointer (0, NONE, SMALL, booth);
     GdkPixbuf *thumb1_pixbuf =
         gdk_pixbuf_new_from_file (thumb1_filename, NULL);
     gtk_image_set_from_pixbuf ((GtkImage*)booth->preview_thumb1_image,
         thumb1_pixbuf);
 
-    gchar *thumb2_filename = get_image_filename_pointer (1, NONE, SMALL, booth);
+    gchar *thumb2_filename =
+        get_image_filename_pointer (1, NONE, SMALL, booth);
     GdkPixbuf *thumb2_pixbuf =
         gdk_pixbuf_new_from_file (thumb2_filename, NULL);
     gtk_image_set_from_pixbuf ((GtkImage*)booth->preview_thumb2_image,
         thumb2_pixbuf);
 
-    gchar *thumb3_filename = get_image_filename_pointer (2, NONE, SMALL, booth);
+    gchar *thumb3_filename =
+        get_image_filename_pointer (2, NONE, SMALL, booth);
     GdkPixbuf *thumb3_pixbuf =
         gdk_pixbuf_new_from_file (thumb3_filename, NULL);
     gtk_image_set_from_pixbuf ((GtkImage*)booth->preview_thumb3_image,
         thumb3_pixbuf);
 
-    gchar *preview_filename = get_image_filename_pointer (0, NONE, LARGE, booth);
+    gchar *preview_filename =
+        get_image_filename_pointer (0, NONE, LARGE, booth);
     GdkPixbuf *preview_pixbuf =
         gdk_pixbuf_new_from_file (preview_filename, NULL);
     gtk_image_set_from_pixbuf ((GtkImage*)booth->preview_large_image,
@@ -627,6 +641,7 @@ void on_take_photo_forward_button_clicked (GtkWidget *button,
 
     gtk_notebook_next_page ((GtkNotebook*)booth->wizard_panel);
 }
+
 
 /* Functions for the third screen */
 
@@ -643,25 +658,48 @@ void on_take_photo_forward_button_clicked (GtkWidget *button,
 void on_photo_select_forward_button_clicked (GtkWidget *button,
     DigitalPhotoBooth *booth)
 {
-    gchar *thumb1_filename = get_image_filename_pointer (0, NONE, SMALL, booth);
+    gchar *filename = get_image_filename_pointer(booth->selected_image_index, NONE, FULL, booth);
+    gchar *filename_ob = get_image_filename_pointer(booth->selected_image_index, OILBLOB, FULL, booth);
+    gchar *filename_ob_sm = get_image_filename_pointer(booth->selected_image_index, OILBLOB, SMALL, booth);
+    gchar *filename_ob_lg = get_image_filename_pointer(booth->selected_image_index, OILBLOB, LARGE, booth);
+    
+    sprintf (filename_ob, "img%04d_ob.jpg", booth->selected_image_index);
+    sprintf (filename_ob_sm, "img%04d_ob_sm.jpg", booth->selected_image_index);
+    sprintf (filename_ob_lg, "img%04d_ob_lg.jpg", booth->selected_image_index);
+    
+    GPid pid;
+    create_oil_blob_image (filename, filename_ob, &pid, NULL);
+    g_child_watch_add (pid, (GChildWatchFunc)oilblob_complete, booth);
+    
+    booth->selected_effect_enum = NONE;
+
+    gchar *thumb1_filename =
+        get_image_filename_pointer (booth->selected_image_index, OILBLOB,
+        SMALL, booth);
     GdkPixbuf *thumb1_pixbuf =
         gdk_pixbuf_new_from_file (thumb1_filename, NULL);
     gtk_image_set_from_pixbuf ((GtkImage*)booth->effects_thumb1_image,
         thumb1_pixbuf);
 
-    gchar *thumb2_filename = get_image_filename_pointer (1, NONE, SMALL, booth);
+    gchar *thumb2_filename =
+        get_image_filename_pointer (booth->selected_image_index, CHARCOAL,
+        SMALL, booth);
     GdkPixbuf *thumb2_pixbuf =
         gdk_pixbuf_new_from_file (thumb2_filename, NULL);
     gtk_image_set_from_pixbuf ((GtkImage*)booth->effects_thumb2_image,
         thumb2_pixbuf);
 
-    gchar *thumb3_filename = get_image_filename_pointer (2, NONE, SMALL, booth);
+    gchar *thumb3_filename =
+        get_image_filename_pointer (booth->selected_image_index, TEXTURE,
+        SMALL, booth);
     GdkPixbuf *thumb3_pixbuf =
         gdk_pixbuf_new_from_file (thumb3_filename, NULL);
     gtk_image_set_from_pixbuf ((GtkImage*)booth->effects_thumb3_image,
         thumb3_pixbuf);
 
-    gchar *effects_filename = get_image_filename_pointer (0, NONE, LARGE, booth);
+    gchar *effects_filename =
+        get_image_filename_pointer (booth->selected_image_index,
+        booth->selected_effect_enum, LARGE, booth);
     GdkPixbuf *effects_pixbuf =
         gdk_pixbuf_new_from_file (effects_filename, NULL);
     gtk_image_set_from_pixbuf ((GtkImage*)booth->effects_large_image,
@@ -760,6 +798,16 @@ void on_effects_select_forward_button_clicked (GtkWidget *button,
 
 }
 
+void oilblob_complete (GPid pid, gint status, DigitalPhotoBooth *booth )
+{
+    char *in = get_image_filename_pointer(booth->selected_image_index, OILBLOB, FULL, booth);
+    char *small = get_image_filename_pointer(booth->selected_image_index, OILBLOB, SMALL, booth);
+    char *large = get_image_filename_pointer(booth->selected_image_index, OILBLOB, LARGE, booth);
+    image_resize (in, small, "160x120", NULL);
+    image_resize (in, large, "640x480", NULL);
+    printf ("done!\n");
+}
+
 /******************************************************************************
  *
  *  Function:       update_effects_image
@@ -772,7 +820,13 @@ void on_effects_select_forward_button_clicked (GtkWidget *button,
  *****************************************************************************/
 void update_effects_image (DigitalPhotoBooth *booth)
 {
-
+    gchar *effects_filename =
+        get_image_filename_pointer (booth->selected_image_index,
+        booth->selected_effect_enum, LARGE, booth);
+    GdkPixbuf *effects_pixbuf =
+        gdk_pixbuf_new_from_file (effects_filename, NULL);
+    gtk_image_set_from_pixbuf ((GtkImage*)booth->effects_large_image,
+        effects_pixbuf);
 }
 
 /******************************************************************************
@@ -788,7 +842,8 @@ void update_effects_image (DigitalPhotoBooth *booth)
 void on_effects_thumb1_button_clicked (GtkWidget *button,
     DigitalPhotoBooth *booth)
 {
-
+    booth->selected_effect_enum = OILBLOB;
+    update_effects_image (booth);
 }
 
 /******************************************************************************
@@ -804,7 +859,8 @@ void on_effects_thumb1_button_clicked (GtkWidget *button,
 void on_effects_thumb2_button_clicked (GtkWidget *button,
     DigitalPhotoBooth *booth)
 {
-
+    booth->selected_effect_enum = CHARCOAL;
+    update_effects_image (booth);
 }
 
 /******************************************************************************
@@ -820,7 +876,8 @@ void on_effects_thumb2_button_clicked (GtkWidget *button,
 void on_effects_thumb3_button_clicked (GtkWidget *button,
     DigitalPhotoBooth *booth)
 {
-
+    booth->selected_effect_enum = TEXTURE;
+    update_effects_image (booth);
 }
 
 /******************************************************************************
@@ -836,6 +893,7 @@ void on_effects_thumb3_button_clicked (GtkWidget *button,
 void on_effects_none_button_clicked (GtkWidget *button,
     DigitalPhotoBooth *booth)
 {
-
+    booth->selected_effect_enum = NONE;
+    update_effects_image (booth);
 }
 
