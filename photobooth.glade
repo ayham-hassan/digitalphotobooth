@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE glade-interface SYSTEM "glade-2.0.dtd">
-<!--Generated with glade3 3.4.0 on Mon Apr 28 09:21:27 2008 -->
+<!--Generated with glade3 3.4.0 on Mon Apr 28 11:39:27 2008 -->
 <glade-interface>
   <widget class="GtkWindow" id="window">
     <property name="width_request">1024</property>
@@ -112,9 +112,10 @@
                     <property name="visible">True</property>
                     <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
                     <child>
-                      <widget class="GtkFixed" id="fixed14">
+                      <widget class="GtkLabel" id="label14">
                         <property name="visible">True</property>
                         <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
+                        <property name="label" translatable="yes">Photo Capture</property>
                       </widget>
                     </child>
                     <child>
@@ -135,7 +136,8 @@
                         <property name="width_request">640</property>
                         <property name="visible">True</property>
                         <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-                        <property name="label" translatable="yes">Press the "Take Photo" button to begin, a 3 second countdown will be provided to allow time to setup the image.
+                        <property name="label" translatable="yes">Press the "Take Photo" button to begin taking the three images.
+There will be a 3 second countdown between each image to allow time for posing.
 Please remain still when the countdown approaches zero for best results.
 The picture has not been captured until the progress bar leaves the screen.</property>
                         <property name="justify">GTK_JUSTIFY_CENTER</property>
@@ -288,15 +290,15 @@ The picture has not been captured until the progress bar leaves the screen.</pro
                           </widget>
                         </child>
                         <child>
-                          <widget class="GtkButton" id="image1_preview_button">
+                          <widget class="GtkButton" id="preview_thumb1_button">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
                             <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
                             <property name="response_id">0</property>
-                            <signal name="clicked" handler="on_image1_preview_button_clicked"/>
+                            <signal name="clicked" handler="on_preview_thumb1_button_clicked"/>
                             <child>
-                              <widget class="GtkImage" id="image1_preview_image">
+                              <widget class="GtkImage" id="preview_thumb1_image">
                                 <property name="width_request">160</property>
                                 <property name="visible">True</property>
                                 <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
@@ -311,15 +313,15 @@ The picture has not been captured until the progress bar leaves the screen.</pro
                           </packing>
                         </child>
                         <child>
-                          <widget class="GtkButton" id="image2_preview_button">
+                          <widget class="GtkButton" id="preview_thumb2_button">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
                             <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
                             <property name="response_id">0</property>
-                            <signal name="clicked" handler="on_image2_preview_button_clicked"/>
+                            <signal name="clicked" handler="on_preview_thumb2_button_clicked"/>
                             <child>
-                              <widget class="GtkImage" id="image2_preview_image">
+                              <widget class="GtkImage" id="preview_thumb2_image">
                                 <property name="width_request">160</property>
                                 <property name="visible">True</property>
                                 <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
@@ -334,15 +336,15 @@ The picture has not been captured until the progress bar leaves the screen.</pro
                           </packing>
                         </child>
                         <child>
-                          <widget class="GtkButton" id="image3_preview_button">
+                          <widget class="GtkButton" id="preview_thumb3_button">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
                             <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
                             <property name="response_id">0</property>
-                            <signal name="clicked" handler="on_image3_preview_button_clicked"/>
+                            <signal name="clicked" handler="on_preview_thumb3_button_clicked"/>
                             <child>
-                              <widget class="GtkImage" id="image3_preview_image">
+                              <widget class="GtkImage" id="preview_thumb3_image">
                                 <property name="width_request">160</property>
                                 <property name="visible">True</property>
                                 <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
@@ -385,7 +387,7 @@ The picture has not been captured until the progress bar leaves the screen.</pro
                           </widget>
                         </child>
                         <child>
-                          <widget class="GtkImage" id="image_preview_area">
+                          <widget class="GtkImage" id="preview_large_image">
                             <property name="width_request">640</property>
                             <property name="height_request">480</property>
                             <property name="visible">True</property>
