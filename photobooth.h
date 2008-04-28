@@ -4,11 +4,31 @@
 #include <gtk/gtk.h>
 #include "proj-nprosser/frame.h"
 #include "proj-nprosser/drv-v4l2.h"
+#include "ImageManipulations.h"
 
 /* location of UI XML file relative to path in which program is running */
 #define BUILDER_XML_FILE "photobooth.xml"
 
+#define TIMER_PHOTO_SECONDS 3
 #define NUM_PHOTOS 3
+#define NUM_PHOTO_TYPES 12
+#define MAX_STRING_LENGTH 256
+
+enum PHOTO_TYPE
+{
+    FULL,
+    SMALL,
+    LARGE,
+    OILBLOB_FULL,
+    OILBLOB_SMALL,
+    OILBLOB_LARGE,
+    CHARCOAL_FULL,
+    CHARCOAL_SMALL,
+    CHARCOAL_LARGE,
+    TEXTURE_FULL,
+    TEXTURE_SMALL,
+    TEXTURE_LARGE
+};
 
 typedef struct
 {
@@ -23,18 +43,30 @@ typedef struct
     GtkWidget *money_forward_button;
     gint money_inserted;
     gint money_total;
-    gchar money_str[255];
+    gchar money_str[MAX_STRING_LENGTH];
     
-    /* second and third panel - streaming video */
+    /* second panel - streaming video */
     V4L2Capture *capture;
     guint video_source_id;
     GtkWidget *videobox;
     GtkWidget *take_photo_button;
     GtkWidget *take_photo_progress;
+    GtkWidget *take_photo_forward_button;
     guint num_photos_taken;
     gint timer_left;
     gint timer_total;
     guint timer_source_id;
+    gchar progress_bar_label[MAX_STRING_LENGTH];
+    
+    /* third panel - photo selection */
+    GtkWidget *image1_preview_image;
+    GtkWidget *image2_preview_image;
+    GtkWidget *image3_preview_image;
+    GtkWidget *image_preview_area;
+    guint selected_image_index;
+    
+    /* filename variables */
+    gchar photos_filenames[NUM_PHOTOS*NUM_PHOTO_TYPES][MAX_STRING_LENGTH];
 } DigitalPhotoBooth;
 
 /* window callback prototypes */
