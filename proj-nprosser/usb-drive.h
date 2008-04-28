@@ -20,4 +20,29 @@
  */
 char *getUSBDriveName();
 
+/* unmountUSBDrive()
+ * Unmounts the USB drive. This function uses the getUSBDriveName function to
+ *  determine the mountpoint for the USB drive.
+ *
+ * Returns 0 when the drive has been unmounted. Returns nonzero if there was a
+ *  problem.
+ */
+int unmountUSBDrive();
+
+/* writeFileToUSBDrive()
+ * Writes a file to the currently connected USB drive. This function uses the
+ *  getUSBDriveName function to determine the mountpoint for the USB drive.
+ *  If a folder named "DigitalPhotoBooth" does not yet exist on the root of the
+ *  drive, it will be created and the specified file will be placed in it. If
+ *  it does exist, a number will be added to the end of the name, starting at
+ *  1 and increasing until an unused one is found.
+ *  
+ * Parameters:
+ *  inFileName: the name of the file (in the current directory) to write
+ *  outFileName: the name of the file to write (this will be on the USB
+ *
+ * Returns 0 if successful, nonzero if an error occurred.
+ */
+int writeFileToUSBDrive(char *inFileName, char *outFileName);
+
 #endif
