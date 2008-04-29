@@ -381,6 +381,7 @@ void money_update (DigitalPhotoBooth *booth)
         
         /* make the forward button available */
         gtk_widget_set_sensitive (booth->money_forward_button, TRUE);
+        gtk_button_enter((GtkButton*)booth->money_forward_button);
     }
     else
     {
