@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE glade-interface SYSTEM "glade-2.0.dtd">
-<!--Generated with glade3 3.4.0 on Tue Apr 29 10:51:45 2008 -->
+<!--Generated with glade3 3.4.0 on Tue Apr 29 18:22:25 2008 -->
 <glade-interface>
   <widget class="GtkWindow" id="window">
     <property name="width_request">1024</property>
@@ -23,7 +23,7 @@
               <widget class="GtkImage" id="banner1_image">
                 <property name="visible">True</property>
                 <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-                <property name="pixbuf">banner1_image.jpg</property>
+                <property name="pixbuf">banner_image.jpg</property>
               </widget>
             </child>
             <child>

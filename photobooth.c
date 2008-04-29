@@ -5,6 +5,8 @@
  */
 
 #include <gtk/gtk.h>
+#include <glib.h>
+#include <glib/gprintf.h>
 #include <string.h>
 #include "proj-nprosser/frame.h"
 #include "proj-nprosser/cam.h"
@@ -182,6 +184,9 @@ gboolean init_app (DigitalPhotoBooth *booth)
 	/* clear the image filename storage area */
 	memset (booth->photos_filenames, 0,
 	    NUM_PHOTOS * NUM_PHOTO_STYLES * NUM_PHOTO_SIZES * MAX_STRING_LENGTH);
+	    
+    /* get the location of the system temp directory */
+    booth->tempdir = g_get_tmp_dir ();
     
     /* connect signals, passing our DigitalPhotoBooth struct as user data */
     gtk_builder_connect_signals (builder, booth);
@@ -365,7 +370,7 @@ gboolean money_pay (gint payment, DigitalPhotoBooth *booth)
  *  Description:    This function updates the money display.
  *  Inputs:         booth - a pointer to the DigitalPhotoBooth struct
  *  Outputs:        
- *  Routines Called: gtk_widget_set_sensitive, sprintf, gtk_label_set_text
+ *  Routines Called: gtk_widget_set_sensitive, g_sprintf, gtk_label_set_text
  *
  *****************************************************************************/
 void money_update (DigitalPhotoBooth *booth)
@@ -390,7 +395,7 @@ void money_update (DigitalPhotoBooth *booth)
     }
     
     /* update the display text */
-    sprintf (booth->money_str, 
+    g_sprintf (booth->money_str, 
         "%d Quarters Inserted\nPlease insert %d more quarters to continue",
         booth->money_inserted, remaining);
 
@@ -501,7 +506,7 @@ gboolean camera_process (DigitalPhotoBooth *booth)
  *                  the video stream.
  *  Inputs:         booth - a pointer to the DigitalPhotoBooth struct
  *  Outputs:        TRUE to schedule the task again, FALSE otherwise
- *  Routines Called: get_image_filename_pointer, sprintf, capture_hr_jpg,
+ *  Routines Called: get_image_filename_pointer, g_sprintf, capture_hr_jpg,
  *                  image_resize, g_idle_add, timer_start, gtk_widget_hide,
  *                  gtk_widget_show
  *
@@ -523,9 +528,9 @@ gboolean take_photo_process (DigitalPhotoBooth *booth)
             booth);
 
         /* create the image filenames */
-        sprintf (filename, "img%04d.jpg", booth->num_photos_taken);
-        sprintf (filename_sm, "img%04d_sm.jpg", booth->num_photos_taken);
-        sprintf (filename_lg, "img%04d_lg.jpg", booth->num_photos_taken);
+        g_sprintf (filename, "%s/img%04d.jpg", booth->tempdir, booth->num_photos_taken);
+        g_sprintf (filename_sm, "%s/img%04d_sm.jpg", booth->tempdir, booth->num_photos_taken);
+        g_sprintf (filename_lg, "%s/img%04d_lg.jpg", booth->tempdir, booth->num_photos_taken);
         
         /* capture a frame and convert it to jpg */
         capture_hr_jpg (booth->capture, filename, 85);
@@ -601,7 +606,7 @@ gboolean take_photo_process (DigitalPhotoBooth *booth)
  *  Description:    This function sets up and starts the countdown timer
  *  Inputs:         booth - a pointer to the DigitalPhotoBooth struct
  *  Outputs:        
- *  Routines Called: gtk_progress_bar_set_fraction, sprintf,
+ *  Routines Called: gtk_progress_bar_set_fraction, g_sprintf,
  *                  gtk_progress_bar_set_text, g_timeout_add_seconds
  *
  *****************************************************************************/
@@ -619,7 +624,7 @@ void timer_start (DigitalPhotoBooth *booth)
         1.0 );
 
     /* create the progress bar text */
-    sprintf (label, "The photo will be taken in %d seconds",
+    g_sprintf (label, "The photo will be taken in %d seconds",
         booth->timer_left);
         
     /* set the progress bar text with the buffer content */
@@ -637,7 +642,7 @@ void timer_start (DigitalPhotoBooth *booth)
  *  Description:    Callback function which processes each timer tick
  *  Inputs:         booth - a pointer to the DigitalPhotoBooth struct
  *  Outputs:        TRUE to schedule the task again, FALSE otherwise
- *  Routines Called: gtk_progress_bar_set_fraction, sprintf, g_source_remove
+ *  Routines Called: gtk_progress_bar_set_fraction, g_sprintf, g_source_remove
  *                  gtk_progress_bar_set_text, g_idle_add
  *
  *****************************************************************************/
@@ -655,7 +660,7 @@ gboolean timer_process (DigitalPhotoBooth *booth)
     if (booth->timer_left > 0)
     {
         /* create the progress bar text */
-        sprintf (label, "The photo will be taken in %d seconds",
+        g_sprintf (label, "The photo will be taken in %d seconds",
             booth->timer_left);
             
         /* set the progress bar text with the buffer content */
@@ -668,7 +673,7 @@ gboolean timer_process (DigitalPhotoBooth *booth)
     else
     {
         /* create the progress bar text */
-        sprintf (label, "Please don't move, the photo is being captured");
+        g_sprintf (label, "Please don't move, the photo is being captured");
             
         /* set the progress bar text with the buffer content */
         gtk_progress_bar_set_text ((GtkProgressBar*)booth->take_photo_progress,
@@ -764,9 +769,9 @@ void on_photo_select_forward_button_clicked (GtkWidget *button,
     gchar *filename_ob_lg = get_image_filename_pointer(booth->selected_image_index, OILBLOB, LARGE, booth);
     
     /* create the OILBLOB image filenames */
-    sprintf (filename_ob, "img%04d_ob.jpg", booth->selected_image_index);
-    sprintf (filename_ob_sm, "img%04d_ob_sm.jpg", booth->selected_image_index);
-    sprintf (filename_ob_lg, "img%04d_ob_lg.jpg", booth->selected_image_index);
+    g_sprintf (filename_ob, "%s/img%04d_ob.jpg", booth->tempdir, booth->selected_image_index);
+    g_sprintf (filename_ob_sm, "%s/img%04d_ob_sm.jpg", booth->tempdir, booth->selected_image_index);
+    g_sprintf (filename_ob_lg, "%s/img%04d_ob_lg.jpg", booth->tempdir, booth->selected_image_index);
 
     /* spawn an async process and add a watch callback to it */
     create_oil_blob_image (filename, filename_ob, &pid, NULL);
@@ -778,9 +783,9 @@ void on_photo_select_forward_button_clicked (GtkWidget *button,
     gchar *filename_ch_lg = get_image_filename_pointer(booth->selected_image_index, CHARCOAL, LARGE, booth);
     
     /* create the CHARCOAL image filenames */
-    sprintf (filename_ch, "img%04d_ch.jpg", booth->selected_image_index);
-    sprintf (filename_ch_sm, "img%04d_ch_sm.jpg", booth->selected_image_index);
-    sprintf (filename_ch_lg, "img%04d_ch_lg.jpg", booth->selected_image_index);
+    g_sprintf (filename_ch, "%s/img%04d_ch.jpg", booth->tempdir, booth->selected_image_index);
+    g_sprintf (filename_ch_sm, "%s/img%04d_ch_sm.jpg", booth->tempdir, booth->selected_image_index);
+    g_sprintf (filename_ch_lg, "%s/img%04d_ch_lg.jpg", booth->tempdir, booth->selected_image_index);
     
     /* spawn an async process and add a watch callback to it */
     create_charcoal_image (filename, filename_ch, &pid, NULL);
@@ -792,12 +797,12 @@ void on_photo_select_forward_button_clicked (GtkWidget *button,
     gchar *filename_tx_lg = get_image_filename_pointer(booth->selected_image_index, TEXTURE, LARGE, booth);
     
     /* create the TEXTURE image filenames */
-    sprintf (filename_tx, "img%04d_tx.jpg", booth->selected_image_index);
-    sprintf (filename_tx_sm, "img%04d_tx_sm.jpg", booth->selected_image_index);
-    sprintf (filename_tx_lg, "img%04d_tx_lg.jpg", booth->selected_image_index);
+    g_sprintf (filename_tx, "%s/img%04d_tx.jpg", booth->tempdir, booth->selected_image_index);
+    g_sprintf (filename_tx_sm, "%s/img%04d_tx_sm.jpg", booth->tempdir, booth->selected_image_index);
+    g_sprintf (filename_tx_lg, "%s/img%04d_tx_lg.jpg", booth->tempdir, booth->selected_image_index);
     
     /* spawn an async process and add a watch callback to it */
-    create_textured_image (filename, "texture_fabric.gif", filename_tx, &pid, NULL);
+    create_textured_image (filename, TEXTURE_FILE, filename_tx, &pid, NULL);
     g_child_watch_add (pid, (GChildWatchFunc)texture_complete, booth);
 
     /* update the effects preview image */
@@ -1138,7 +1143,7 @@ void on_effects_none_button_clicked (GtkWidget *button,
  *  Description:    Label the buttons with the current prices
  *  Inputs:         booth - a pointer to the DigitalPhotoBooth struct
  *  Outputs:        
- *  Routines Called: gtk_button_set_label, sprintf
+ *  Routines Called: gtk_button_set_label, g_sprintf
  *
  *****************************************************************************/
 void delivery_init (DigitalPhotoBooth *booth)
@@ -1147,13 +1152,13 @@ void delivery_init (DigitalPhotoBooth *booth)
     gchar label[MAX_STRING_LENGTH];
     
     /* create the button label for usb delivery */
-    sprintf (label, "Send to Thumb Drive\nCost: %d Quarters", booth->usb_cost);
+    g_sprintf (label, "Send to Thumb Drive\nCost: %d Quarters", booth->usb_cost);
     
     /* set the button label to the string buffer content */
     gtk_button_set_label ((GtkButton*)booth->delivery_usb_toggle, label);
     
     /* create the button label for print delivery */
-    sprintf (label, "Send to Printer\nCost: %d Quarters",
+    g_sprintf (label, "Send to Printer\nCost: %d Quarters",
         booth->print_cost);
     
     /* set the button label to the string buffer content */
@@ -1166,7 +1171,7 @@ void delivery_init (DigitalPhotoBooth *booth)
  *  Description:    Recalculate the costs of delivery
  *  Inputs:         booth - a pointer to the DigitalPhotoBooth struct
  *  Outputs:        
- *  Routines Called: gtk_toggle_button_get_active, sprintf, strchr,
+ *  Routines Called: gtk_toggle_button_get_active, g_sprintf, strchr,
  *                  gtk_widget_set_sensitive, gtk_label_set_text
  *
  *****************************************************************************/
@@ -1206,7 +1211,7 @@ void delivery_update (DigitalPhotoBooth *booth)
     required = booth->delivery_total_cost - booth->money_inserted;
     
     /* start building the string with the information available */
-    sprintf (label, "Inserted: %d Quarters\nTotal Cost: %d Quarters\n",
+    g_sprintf (label, "Inserted: %d Quarters\nTotal Cost: %d Quarters\n",
         booth->money_inserted, booth->delivery_total_cost);
     
     /* if sufficient funds */
@@ -1216,7 +1221,7 @@ void delivery_update (DigitalPhotoBooth *booth)
         required = 0;
         
         /* concatenate the string */
-        sprintf (strchr (label, 0), "Required: %d Quarters", required);
+        g_sprintf (strchr (label, 0), "Required: %d Quarters", required);
         
         /* if at least one toggle button is active, then we can continue */
         if (gtk_toggle_button_get_active 
@@ -1236,8 +1241,8 @@ void delivery_update (DigitalPhotoBooth *booth)
     else
     {
         /* concatenate the string twice */
-        sprintf (strchr(label, 0), "Required: %d Quarters\n\n", required);
-        sprintf (strchr(label, 0), 
+        g_sprintf (strchr(label, 0), "Required: %d Quarters\n\n", required);
+        g_sprintf (strchr(label, 0), 
             "Please insert additional quarters to continue.");
 
         /* make the forward button unavailable */
@@ -1275,6 +1280,8 @@ void on_delivery_forward_button_clicked (GtkWidget *button,
             ((GtkToggleButton*)booth->delivery_print_toggle))
         {
             printf ("PRINTER DELIVERY!\n");
+            gchar *filename = get_image_filename_pointer (booth->selected_image_index, booth->selected_effect_enum, FULL, booth);
+            printImage (filename, NULL);
         }
         
         gtk_toggle_button_set_active ((GtkToggleButton*)booth->delivery_usb_toggle, FALSE);
