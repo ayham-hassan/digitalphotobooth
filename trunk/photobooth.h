@@ -42,7 +42,8 @@ typedef struct
     GtkWidget *money_message_label;
     GtkWidget *money_forward_button;
     gint money_inserted;
-    gint money_total;
+    gint usb_cost;
+    gint print_cost;
     gchar money_str[MAX_STRING_LENGTH];
     
     /* second panel - streaming video */

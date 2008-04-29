@@ -138,7 +138,8 @@ gboolean init_app (DigitalPhotoBooth *booth)
         GTK_WIDGET (gtk_builder_get_object (builder, "effects_thumb3_button"));
     
     /* setup money handler variables */
-    booth->money_total = 4;
+    booth->usb_cost = 1;
+    booth->print_cost = 2;
     booth->money_inserted = 0;
     money_update(booth);
     
@@ -300,7 +301,7 @@ void money_insert (DigitalPhotoBooth *booth)
 void money_update (DigitalPhotoBooth *booth)
 {
     /* calculate the money still required */
-    gint remaining = booth->money_total - booth->money_inserted;
+    gint remaining = booth->usb_cost - booth->money_inserted;
     
     /* if there is enough, allow the user to proceed */
     if (remaining <= 0)
@@ -664,7 +665,7 @@ void on_photo_select_forward_button_clicked (GtkWidget *button,
     sprintf (filename_tx_sm, "img%04d_tx_sm.jpg", booth->selected_image_index);
     sprintf (filename_tx_lg, "img%04d_tx_lg.jpg", booth->selected_image_index);
     
-    create_textured_image (filename, "pencil.gif", filename_tx, &pid, NULL);
+    create_textured_image (filename, "texture_fabric.gif", filename_tx, &pid, NULL);
     g_child_watch_add (pid, (GChildWatchFunc)texture_complete, booth);
 
     update_effects_image (booth);
