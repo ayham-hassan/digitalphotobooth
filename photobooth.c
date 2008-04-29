@@ -213,7 +213,7 @@ void on_window_destroy (GtkObject *object, DigitalPhotoBooth *booth)
  *                  event - a pointer to the key press event object
  *                  booth - a pointer to the DigitalPhotoBooth struct
  *  Outputs:        TRUE if event handled, FALSE if event should propagate.
- *  Routines Called: money_insert, money_update
+ *  Routines Called: money_insert
  *
  *****************************************************************************/
 gboolean on_window_key_press_event (GtkWidget *window, GdkEventKey *event,
@@ -236,7 +236,6 @@ gboolean on_window_key_press_event (GtkWidget *window, GdkEventKey *event,
     {
         /* insert money and update the money display */
         money_insert (booth);
-        money_update (booth);
     }
 
     return FALSE;
@@ -277,16 +276,41 @@ gchar* get_image_filename_pointer (guint index, enum PHOTO_STYLE pstyle,
 /******************************************************************************
  *
  *  Function:       money_insert
- *  Description:    This function increases the current money total.
+ *  Description:    This function increases the current money total and
+ *                  triggers an update.
  *  Inputs:         booth - a pointer to the DigitalPhotoBooth struct
  *  Outputs:        
- *  Routines Called: 
+ *  Routines Called: money_update
  *
  *****************************************************************************/
 void money_insert (DigitalPhotoBooth *booth)
 {
     /* increase the amount of money inserted into the machine */
     ++booth->money_inserted;
+    money_update (booth);
+}
+
+/******************************************************************************
+ *
+ *  Function:       money_pay
+ *  Description:    This function checks the amount of available money and
+ *                  deducts the purchase.
+ *  Inputs:         booth - a pointer to the DigitalPhotoBooth struct
+ *  Outputs:        
+ *  Routines Called: money_update
+ *
+ *****************************************************************************/
+gboolean money_pay (gint payment, DigitalPhotoBooth *booth)
+{
+    /* increase the amount of money inserted into the machine */
+    if (booth->money_inserted >= payment)
+    {
+        booth->money_inserted -= payment;
+        money_update (booth);
+        return TRUE;
+    }
+    
+    return FALSE;
 }
 
 /******************************************************************************
