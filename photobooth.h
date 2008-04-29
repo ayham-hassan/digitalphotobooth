@@ -70,6 +70,9 @@ typedef struct
     GtkWidget *effects_thumb2_image;
     GtkWidget *effects_thumb3_image;
     GtkWidget *effects_large_image;
+    GtkWidget *effects_thumb1_button;
+    GtkWidget *effects_thumb2_button;
+    GtkWidget *effects_thumb3_button;
     enum PHOTO_STYLE selected_effect_enum;
     
     /* filename variables */
@@ -265,22 +268,6 @@ void timer_start (DigitalPhotoBooth *booth);
  *
  *****************************************************************************/
 gboolean timer_process (DigitalPhotoBooth *booth);
-
-/******************************************************************************
- *
- *  Function:       on_take_photo_forward_button_clicked
- *  Description:    Callback function for the take_photo_forward_button
- *  Inputs:         button - a pointer to the button object
- *                  booth - a pointer to the DigitalPhotoBooth struct
- *  Outputs:        
- *  Routines Called: g_source_remove, v4l2CaptureStopStreaming,
- *                  gtk_widget_hide, gtk_widget_show,
- *                  get_image_filename_pointer, gdk_pixbuf_new_from_file,
- *                  gtk_image_set_from_pixbuf, gtk_notebook_next_page
- *
- *****************************************************************************/
-void on_take_photo_forward_button_clicked (GtkWidget *button,
-    DigitalPhotoBooth *booth);
     
 
 /* Functions for the third screen */
@@ -365,7 +352,47 @@ void on_preview_thumb3_button_clicked (GtkWidget *button,
 void on_effects_select_forward_button_clicked (GtkWidget *button,
     DigitalPhotoBooth *booth);
 
+/******************************************************************************
+ *
+ *  Function:       oilblob_complete
+ *  Description:    Callback function for the oilblob process completion
+ *  Inputs:         pid - the pid of the exiting process
+ *                  status - the exit status of the process *                  booth - a pointer to the DigitalPhotoBooth struct
+ *  Outputs:        
+ *  Routines Called: get_image_filename_pointer, image_resize,
+ *                  gdk_pixbuf_new_from_file, gtk_image_set_from_pixbuf,
+ *                  gtk_image_set_sensitive
+ *
+ *****************************************************************************/
 void oilblob_complete (GPid pid, gint status, DigitalPhotoBooth *booth );
+
+/******************************************************************************
+ *
+ *  Function:       charcoal_complete
+ *  Description:    Callback function for the charcoal process completion
+ *  Inputs:         pid - the pid of the exiting process
+ *                  status - the exit status of the process *                  booth - a pointer to the DigitalPhotoBooth struct
+ *  Outputs:        
+ *  Routines Called: get_image_filename_pointer, image_resize,
+ *                  gdk_pixbuf_new_from_file, gtk_image_set_from_pixbuf,
+ *                  gtk_image_set_sensitive
+ *
+ *****************************************************************************/
+void charcoal_complete (GPid pid, gint status, DigitalPhotoBooth *booth);
+
+/******************************************************************************
+ *
+ *  Function:       texture_complete
+ *  Description:    Callback function for the texture process completion
+ *  Inputs:         pid - the pid of the exiting process
+ *                  status - the exit status of the process *                  booth - a pointer to the DigitalPhotoBooth struct
+ *  Outputs:        
+ *  Routines Called: get_image_filename_pointer, image_resize,
+ *                  gdk_pixbuf_new_from_file, gtk_image_set_from_pixbuf,
+ *                  gtk_image_set_sensitive
+ *
+ *****************************************************************************/
+void texture_complete (GPid pid, gint status, DigitalPhotoBooth *booth);
 
 /******************************************************************************
  *
