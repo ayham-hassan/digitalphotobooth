@@ -53,7 +53,7 @@ gboolean create_oil_blob_image(char * inImage, char * outImage, GPid * id, GErro
 {
 	/* Setup argument strings. */
 	char paint[7] = "-paint";
-	char oilAmt[2] = "2";	
+	char oilAmt[2] = "3";	
 
 	/* Setup the arguments for the commands. */	
 	char * args[6];
