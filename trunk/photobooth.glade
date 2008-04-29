@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE glade-interface SYSTEM "glade-2.0.dtd">
-<!--Generated with glade3 3.4.0 on Mon Apr 28 17:31:00 2008 -->
+<!--Generated with glade3 3.4.0 on Mon Apr 28 20:31:44 2008 -->
 <glade-interface>
   <widget class="GtkWindow" id="window">
     <property name="width_request">1024</property>
@@ -202,20 +202,6 @@ The picture has not been captured until the progress bar leaves the screen.</pro
                         <property name="position">1</property>
                       </packing>
                     </child>
-                    <child>
-                      <widget class="GtkButton" id="take_photo_forward_button">
-                        <property name="can_focus">True</property>
-                        <property name="receives_default">True</property>
-                        <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-                        <property name="label" translatable="yes">gtk-go-forward</property>
-                        <property name="use_stock">True</property>
-                        <property name="response_id">0</property>
-                        <signal name="clicked" handler="on_take_photo_forward_button_clicked"/>
-                      </widget>
-                      <packing>
-                        <property name="position">2</property>
-                      </packing>
-                    </child>
                   </widget>
                   <packing>
                     <property name="position">1</property>
@@ -300,6 +286,7 @@ The picture has not been captured until the progress bar leaves the screen.</pro
                             <child>
                               <widget class="GtkImage" id="preview_thumb1_image">
                                 <property name="width_request">160</property>
+                                <property name="height_request">120</property>
                                 <property name="visible">True</property>
                                 <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
                                 <property name="stock">gtk-missing-image</property>
@@ -323,6 +310,7 @@ The picture has not been captured until the progress bar leaves the screen.</pro
                             <child>
                               <widget class="GtkImage" id="preview_thumb2_image">
                                 <property name="width_request">160</property>
+                                <property name="height_request">120</property>
                                 <property name="visible">True</property>
                                 <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
                                 <property name="stock">gtk-missing-image</property>
@@ -346,6 +334,7 @@ The picture has not been captured until the progress bar leaves the screen.</pro
                             <child>
                               <widget class="GtkImage" id="preview_thumb3_image">
                                 <property name="width_request">160</property>
+                                <property name="height_request">120</property>
                                 <property name="visible">True</property>
                                 <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
                                 <property name="stock">gtk-missing-image</property>
@@ -540,6 +529,7 @@ When the image you want to keep is shown in the preview area, click "Forward" to
                         <child>
                           <widget class="GtkButton" id="effects_thumb1_button">
                             <property name="visible">True</property>
+                            <property name="sensitive">False</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
                             <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
@@ -551,7 +541,7 @@ When the image you want to keep is shown in the preview area, click "Forward" to
                                 <property name="height_request">120</property>
                                 <property name="visible">True</property>
                                 <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-                                <property name="stock">gtk-missing-image</property>
+                                <property name="stock">gtk-refresh</property>
                               </widget>
                             </child>
                           </widget>
@@ -564,6 +554,7 @@ When the image you want to keep is shown in the preview area, click "Forward" to
                         <child>
                           <widget class="GtkButton" id="effects_thumb2_button">
                             <property name="visible">True</property>
+                            <property name="sensitive">False</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
                             <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
@@ -575,7 +566,7 @@ When the image you want to keep is shown in the preview area, click "Forward" to
                                 <property name="height_request">120</property>
                                 <property name="visible">True</property>
                                 <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-                                <property name="stock">gtk-missing-image</property>
+                                <property name="stock">gtk-refresh</property>
                               </widget>
                             </child>
                           </widget>
@@ -588,6 +579,7 @@ When the image you want to keep is shown in the preview area, click "Forward" to
                         <child>
                           <widget class="GtkButton" id="effects_thumb3_button">
                             <property name="visible">True</property>
+                            <property name="sensitive">False</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
                             <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
@@ -599,7 +591,7 @@ When the image you want to keep is shown in the preview area, click "Forward" to
                                 <property name="height_request">120</property>
                                 <property name="visible">True</property>
                                 <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-                                <property name="stock">gtk-missing-image</property>
+                                <property name="stock">gtk-refresh</property>
                               </widget>
                             </child>
                           </widget>
@@ -659,7 +651,7 @@ When the image you want to keep is shown in the preview area, click "Forward" to
                             <property name="height_request">480</property>
                             <property name="visible">True</property>
                             <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-                            <property name="stock">gtk-missing-image</property>
+                            <property name="stock">gtk-refresh</property>
                           </widget>
                           <packing>
                             <property name="expand">False</property>
