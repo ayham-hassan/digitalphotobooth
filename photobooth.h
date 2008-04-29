@@ -1,3 +1,9 @@
+/*
+ * photobooth.h
+ * 
+ * 	 @authors -	Kyle J. Farnung - kjf8400@rit.edu
+ */
+
 #ifndef PHOTOBOOTH_H_
 #define PHOTOBOOTH_H_
 
@@ -57,7 +63,6 @@ typedef struct
     gint timer_left;
     gint timer_total;
     guint timer_source_id;
-    gchar progress_bar_label[MAX_STRING_LENGTH];
     
     /* third panel - photo selection */
     GtkWidget *preview_thumb1_image;
@@ -75,6 +80,14 @@ typedef struct
     GtkWidget *effects_thumb2_button;
     GtkWidget *effects_thumb3_button;
     enum PHOTO_STYLE selected_effect_enum;
+    
+    /* fifth panel - delivery selection */
+    GtkWidget *delivery_usb_toggle;
+    GtkWidget *delivery_print_toggle;
+    GtkWidget *delivery_total_label;
+    GtkWidget *delivery_large_image;
+    GtkWidget *delivery_forward_button;
+    gint delivery_total_cost;
     
     /* filename variables */
     gchar photos_filenames[NUM_PHOTOS * NUM_PHOTO_STYLES * NUM_PHOTO_SIZES][MAX_STRING_LENGTH];
@@ -167,6 +180,18 @@ void money_insert (DigitalPhotoBooth *booth);
 
 /******************************************************************************
  *
+ *  Function:       money_pay
+ *  Description:    This function checks the amount of available money and
+ *                  deducts the purchase.
+ *  Inputs:         booth - a pointer to the DigitalPhotoBooth struct
+ *  Outputs:        
+ *  Routines Called: money_update
+ *
+ *****************************************************************************/
+gboolean money_pay (gint payment, DigitalPhotoBooth *booth);
+
+/******************************************************************************
+ *
  *  Function:       money_update
  *  Description:    This function updates the money display.
  *  Inputs:         booth - a pointer to the DigitalPhotoBooth struct
@@ -235,19 +260,6 @@ gboolean take_photo_process (DigitalPhotoBooth *booth);
 
 /******************************************************************************
  *
- *  Function:       on_take_photo_button_clicked
- *  Description:    Callback function for the take_photo_button
- *  Inputs:         button - a pointer to the button object
- *                  booth - a pointer to the DigitalPhotoBooth struct
- *  Outputs:        
- *  Routines Called: gtk_widget_hide, gtk_widget_show, timer_start
- *
- *****************************************************************************/
-void on_take_photo_button_clicked (GtkWidget *button,
-    DigitalPhotoBooth *booth);
-
-/******************************************************************************
- *
  *  Function:       timer_start
  *  Description:    This function sets up and starts the countdown timer
  *  Inputs:         booth - a pointer to the DigitalPhotoBooth struct
@@ -270,8 +282,33 @@ void timer_start (DigitalPhotoBooth *booth);
  *****************************************************************************/
 gboolean timer_process (DigitalPhotoBooth *booth);
     
+/******************************************************************************
+ *
+ *  Function:       on_take_photo_button_clicked
+ *  Description:    Callback function for the take_photo_button
+ *  Inputs:         button - a pointer to the button object
+ *                  booth - a pointer to the DigitalPhotoBooth struct
+ *  Outputs:        
+ *  Routines Called: gtk_widget_hide, gtk_widget_show, timer_start
+ *
+ *****************************************************************************/
+void on_take_photo_button_clicked (GtkWidget *button,
+    DigitalPhotoBooth *booth);
+
 
 /* Functions for the third screen */
+
+/******************************************************************************
+ *
+ *  Function:       update_preview_image
+ *  Description:    This function updates the larger preview image
+ *  Inputs:         booth - a pointer to the DigitalPhotoBooth struct
+ *  Outputs:        
+ *  Routines Called: get_image_filename_pointer, gdk_pixbuf_new_from_file,
+ *                  gtk_image_set_from_pixbuf
+ *
+ *****************************************************************************/
+void update_preview_image (DigitalPhotoBooth *booth);
 
 /******************************************************************************
  *
@@ -285,18 +322,6 @@ gboolean timer_process (DigitalPhotoBooth *booth);
  *****************************************************************************/
 void on_photo_select_forward_button_clicked (GtkWidget *button,
     DigitalPhotoBooth *booth);
-
-/******************************************************************************
- *
- *  Function:       update_preview_image
- *  Description:    This function updates the larger preview image
- *  Inputs:         booth - a pointer to the DigitalPhotoBooth struct
- *  Outputs:        
- *  Routines Called: get_image_filename_pointer, gdk_pixbuf_new_from_file,
- *                  gtk_image_set_from_pixbuf
- *
- *****************************************************************************/
-void update_preview_image (DigitalPhotoBooth *booth);
 
 /******************************************************************************
  *
@@ -339,19 +364,6 @@ void on_preview_thumb3_button_clicked (GtkWidget *button,
 
 
 /* Functions for the fourth screen */
-
-/******************************************************************************
- *
- *  Function:       on_effects_select_forward_button_clicked
- *  Description:    Callback function for the effects_select_forward_button
- *  Inputs:         button - a pointer to the button object
- *                  booth - a pointer to the DigitalPhotoBooth struct
- *  Outputs:        
- *  Routines Called: gtk_notebook_next_page
- *
- *****************************************************************************/
-void on_effects_select_forward_button_clicked (GtkWidget *button,
-    DigitalPhotoBooth *booth);
 
 /******************************************************************************
  *
@@ -409,6 +421,19 @@ void update_effects_image (DigitalPhotoBooth *booth);
 
 /******************************************************************************
  *
+ *  Function:       on_effects_select_forward_button_clicked
+ *  Description:    Callback function for the effects_select_forward_button
+ *  Inputs:         button - a pointer to the button object
+ *                  booth - a pointer to the DigitalPhotoBooth struct
+ *  Outputs:        
+ *  Routines Called: gtk_notebook_next_page
+ *
+ *****************************************************************************/
+void on_effects_select_forward_button_clicked (GtkWidget *button,
+    DigitalPhotoBooth *booth);
+
+/******************************************************************************
+ *
  *  Function:       on_effects_thumb1_button_clicked
  *  Description:    Callback function for the effects_thumb1_button
  *  Inputs:         button - a pointer to the button object
@@ -457,6 +482,71 @@ void on_effects_thumb3_button_clicked (GtkWidget *button,
  *
  *****************************************************************************/
 void on_effects_none_button_clicked (GtkWidget *button,
+    DigitalPhotoBooth *booth);
+
+
+/* Functions for the fifth screen */
+
+/******************************************************************************
+ *
+ *  Function:       delivery_init
+ *  Description:    Label the buttons with the current prices
+ *  Inputs:         booth - a pointer to the DigitalPhotoBooth struct
+ *  Outputs:        
+ *  Routines Called: gtk_button_set_label, sprintf
+ *
+ *****************************************************************************/
+void delivery_init (DigitalPhotoBooth *booth);
+    
+/******************************************************************************
+ *
+ *  Function:       delivery_update
+ *  Description:    Recalculate the costs of delivery
+ *  Inputs:         booth - a pointer to the DigitalPhotoBooth struct
+ *  Outputs:        
+ *  Routines Called: gtk_toggle_button_get_active, sprintf, strchr,
+ *                  gtk_widget_set_sensitive, gtk_label_set_text
+ *
+ *****************************************************************************/
+void delivery_update (DigitalPhotoBooth *booth);
+
+/******************************************************************************
+ *
+ *  Function:       on_delivery_forward_button_clicked
+ *  Description:    Callback function for the delivery_forward_button
+ *  Inputs:         button - a pointer to the button object
+ *                  booth - a pointer to the DigitalPhotoBooth struct
+ *  Outputs:        
+ *  Routines Called: 
+ *
+ *****************************************************************************/
+void on_delivery_forward_button_clicked (GtkWidget *button,
+    DigitalPhotoBooth *booth);
+    
+/******************************************************************************
+ *
+ *  Function:       on_delivery_usb_toggle_toggled
+ *  Description:    Callback function for the delivery_usb_toggle
+ *  Inputs:         button - a pointer to the button object
+ *                  booth - a pointer to the DigitalPhotoBooth struct
+ *  Outputs:        
+ *  Routines Called: 
+ *
+ *****************************************************************************/
+void on_delivery_usb_toggle_toggled (GtkWidget *button,
+    DigitalPhotoBooth *booth);
+
+/******************************************************************************
+ *
+ *  Function:       on_delivery_print_toggle_toggled
+ *  Description:    Callback function for the delivery_print_toggle
+ *  Inputs:         button - a pointer to the button object
+ *                  booth - a pointer to the DigitalPhotoBooth struct
+ *  Outputs:        
+ *  Routines Called: 
+ *
+ *****************************************************************************/
+void on_delivery_print_toggle_toggled (GtkWidget *button,
     DigitalPhotoBooth *booth);
 
 #endif
