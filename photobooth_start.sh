@@ -1,4 +1,4 @@
-man #!/bin/bash
+#!/bin/bash
 
 ./photobooth &
 sleep 2

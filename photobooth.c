@@ -38,7 +38,10 @@ int main (int argc, char *argv[])
     if (init_app (booth) == FALSE) return 1; /* error loading UI */
 
     /* show the window */
-    gtk_widget_show (booth->window);                
+    gtk_widget_show (booth->window);
+    
+    /* make the window fullscreen */
+    gtk_window_fullscreen ((GtkWindow*)booth->window);                
     
     /* enter GTK+ main loop */
     gtk_main ();
