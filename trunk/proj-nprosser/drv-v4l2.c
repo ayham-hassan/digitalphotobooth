@@ -271,7 +271,6 @@ static int capture_munmap(V4L2Capture *dev){
 }
 
 static int capture_refresh_norm(V4L2Capture *dev){
-  int input;
   int res;
   v4l2_std_id id;
 	
@@ -299,7 +298,6 @@ static int capture_refresh_image_format(V4L2Capture *dev){
   int res;
   int width;
   int height;
-  const char*name;
 	
   argp.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
   res = v4l_ioctl(dev,VIDIOC_G_FMT,&argp);
@@ -358,7 +356,7 @@ static int capture_query_channel(V4L2Capture *dev){
       //					__func__,
       //					argp.name,
       //					argp.type == V4L2_INPUT_TYPE_TUNER ? "has tuner" : "hasn't tuner");
-      dev->channel_list[i] = strdup(argp.name);		
+      dev->channel_list[i] = strdup((char *)argp.name);		
     }
     dev->channel_list[i] = 0;
   }
@@ -401,7 +399,7 @@ static int capture_query_norm(V4L2Capture *dev){
 		
       //capture_log(dev,"%s::norm[%s] id = %d\n",__func__,std.name,std.id);
 					
-      dev->norm_list[i] = strdup(std.name);
+      dev->norm_list[i] = strdup((char *)std.name);
       dev->std_list[i] = std.id;
 					
     }
@@ -553,10 +551,10 @@ V4L2Capture* v4l2CaptureOpen(const char *filename) {
       capture = malloc(sizeof(V4L2Capture));
       memset(capture,0,sizeof(V4L2Capture));
       capture->fd = fd;
-      capture->name = strdup(argp.card);
-      capture->driver = strdup(argp.driver);
-      capture->bus = strdup(argp.bus_info);
-      capture->location = strdup(filename);
+      capture->name = strdup((char *)argp.card);
+      capture->driver = strdup((char *)argp.driver);
+      capture->bus = strdup((char *)argp.bus_info);
+      capture->location = strdup((char *)filename);
       capture->capabilities = argp.capabilities;
       capture->iomode = V4L2_CAP_READWRITE;
 			
@@ -657,7 +655,6 @@ VidFrame* v4l2CaptureQueryFrame(V4L2Capture* capture){
 }
 
 void v4l2CaptureRelease(V4L2Capture** capture){
-  int i;
 	
   if (capture == 0 || *capture == 0)
     return;
@@ -871,9 +868,6 @@ int v4l2CaptureGetImageFormat(V4L2Capture *capture){
 int v4l2CaptureSetImageFormat(V4L2Capture *capture,fourcc_t fourcc,VidSize *size){
   struct v4l2_format argp;
   int res;
-  int width;
-  int height;
-  const char*name;
 	
   argp.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
   res = v4l_ioctl(capture,VIDIOC_G_FMT,&argp);
