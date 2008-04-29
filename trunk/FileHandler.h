@@ -17,4 +17,4 @@
  *  Routines Called: g_spawn_async
  *
  *****************************************************************************/
-gboolean printImage(char * toPrint, GPid * id, GError *error);
+gboolean printImage(char * toPrint, GError *error);

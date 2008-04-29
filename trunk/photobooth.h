@@ -12,8 +12,19 @@
 #include "proj-nprosser/drv-v4l2.h"
 #include "ImageManipulations.h"
 
+#ifndef PREFIX
+/* installer prefix value */
+#define PREFIX "/usr/local/"
+#endif
+
+/* location of the data directory */
+#define DATA_DIR PREFIX "share/photobooth/"
+
 /* location of UI XML file relative to path in which program is running */
-#define BUILDER_XML_FILE "photobooth.xml"
+#define BUILDER_XML_FILE DATA_DIR "photobooth.xml"
+
+/* location of the texture file */
+#define TEXTURE_FILE DATA_DIR "texture_fabric.gif"
 
 #define TIMER_PHOTO_SECONDS 3
 #define NUM_PHOTOS 3
@@ -90,6 +101,7 @@ typedef struct
     gint delivery_total_cost;
     
     /* filename variables */
+    const gchar *tempdir;
     gchar photos_filenames[NUM_PHOTOS * NUM_PHOTO_STYLES * NUM_PHOTO_SIZES][MAX_STRING_LENGTH];
 } DigitalPhotoBooth;
 

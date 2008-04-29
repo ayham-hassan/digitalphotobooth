@@ -17,7 +17,7 @@
  *  Routines Called: g_spawn_async
  *
  *****************************************************************************/
-gboolean printImage(char * toPrint, GPid * id, GError *error)
+gboolean printImage(char * toPrint, GError *error)
 {
 	/* Setup the argument strings. */
 	char cmd[4] = "lpr";
@@ -33,6 +33,6 @@ gboolean printImage(char * toPrint, GPid * id, GError *error)
 	args[4] = '\0';
 
     /* Spawn a new process, to be run asynchronously. */
-	return g_spawn_async ( NULL, args, NULL, G_SPAWN_DO_NOT_REAP_CHILD | G_SPAWN_SEARCH_PATH, NULL, NULL, id, &error);	
+	return g_spawn_sync (NULL, args, NULL, G_SPAWN_SEARCH_PATH, NULL, NULL, NULL, NULL, NULL, &error);	
 }
 
