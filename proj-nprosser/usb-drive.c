@@ -28,7 +28,7 @@ static int isExpectedFilename( char *filename ){
   int i = 0;
   int counter = 0;
 
-  for( i; i < 8; i++ ){
+  for( i = 0; i < 8; i++ ){
     /* strcmp returns 0 if two strings are equal */
     if( !strcmp( filename, expectedFiles[ i ] ) ){
       counter ++;
@@ -54,7 +54,6 @@ char *getUSBDriveName(){
   struct dirent *ep;
   char *filename = NULL;
   char *fn = 0;
-  int counter1 = 0, counter2 = 0;
 
   printf("getUSBDriveName(): ");
 
@@ -62,7 +61,7 @@ char *getUSBDriveName(){
 
   /* List the files in /media and check whether each is an expected file */
   if( media != NULL ){
-    while( ep = readdir( media ) ){
+    while( (ep = readdir( media )) ){
       if( !isExpectedFilename( ep -> d_name ) ){
         fn = ep -> d_name;
       }
@@ -149,7 +148,7 @@ int writeFileToUSBDrive(char *inFileName, char *outFileName){
 
   /* Figure out what the final sub-directory name is */
   if( usbDrive != NULL ){
-    while( ep = readdir( usbDrive ) ){
+    while( (ep = readdir( usbDrive )) ){
       if( !strcmp( ep->d_name, dirname ) ){ /* "if ep->d_name == dirname" */
         char suffix[2] = {( (char)(counter + 0x30) ), '\0'};
         strcat(dirname, suffix);
