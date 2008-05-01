@@ -124,7 +124,7 @@ int writeFileToUSBDrive(char *inFileName, char *outFileName){
   char *usbDriveName = getUSBDriveName();
 
   /* Stuff having to do with searching through directories */
-  DIR *usbDrive = opendir( usbDriveName );
+  DIR *usbDrive;
   struct dirent *ep;
   
   /* Input file (source) and output file (destination) */
@@ -146,46 +146,65 @@ int writeFileToUSBDrive(char *inFileName, char *outFileName){
 
   printf("writeFileToUSBDrive(): ");
 
-  /* Figure out what the final sub-directory name is */
-  if( usbDrive != NULL ){
-    while( (ep = readdir( usbDrive )) ){
-      if( !strcmp( ep->d_name, dirname ) ){ /* "if ep->d_name == dirname" */
-        char suffix[2] = {( (char)(counter + 0x30) ), '\0'};
-        strcat(dirname, suffix);
-        counter++;
-      } /* if */
+  if( usbDriveName != NULL ){ /* USB drive not detected by getUSBDriveName */
+
+    /* Open the USB drive for listing */
+    usbDrive = opendir( usbDriveName );
+
+    /* Figure out what the final sub-directory name is */
+    if( usbDrive != NULL ){ /* USB drive could not be opened */
+      while( ep = readdir( usbDrive ) ){
+        if( !strcmp( ep->d_name, dirname ) ){ /* "if ep->d_name == dirname" */
+          char suffix[2] = {( (char)(counter + 0x30) ), '\0'};
+          strcat(dirname, suffix);
+          counter++;
+        } /* if */
+      }
+    } else {
+      fprintf(stderr, "Error: USB drive could not be read. \n");
+    } 
+    
+    /* Catenate all the stuff together for the path to the output file */
+    strcat(usbDriveName, "/");
+    strcat(usbDriveName, dirname);
+    strcat(usbDriveName, "/");
+
+    printf("mkdir making %s \n", usbDriveName);
+
+    /* Make the directory on the USB drive */
+    retVal = mkdir(usbDriveName, mode);
+
+    /* Catenate the output file name */
+    strcat(usbDriveName, outFileName);
+
+    printf("writing %s \n", usbDriveName);
+
+    inFile = fopen(inFileName, "rb");
+    outFile = fopen(usbDriveName, "wb");
+
+    /* Copy the input file to the output file */
+    int errFlag = 0;
+    if( (inFile != NULL) && (outFile != NULL) ){
+      errFlag |= ferror(inFile);
+      errFlag |= ferror(outFile);
+      while( !feof(inFile) && !errFlag ){
+        errFlag = 0; /* This should be fresh every time */
+        data = fgetc(inFile);
+        errFlag = ferror(inFile);
+        if( !errFlag ){
+          fputc(data, outFile); 
+          errFlag |= ferror(outFile);
+        }
+      }
     }
-  } else {
-    fprintf(stderr, "I just took a dump in my underwear. Yippee! \n");
+
+    fclose(inFile);
+    fclose(outFile);
+  } /* end of chech for whether usb drive was found */
+  else {
+    retVal = -1;
+    fprintf(stderr, "Error: USB drive not found. \n");
   }
-
-  /* Catenate all the stuff together for the path to the output file */
-  strcat(usbDriveName, "/");
-  strcat(usbDriveName, dirname);
-  strcat(usbDriveName, "/");
-
-  printf("mkdir making %s \n", usbDriveName);
-
-  /* Make the directory on the USB drive */
-  retVal = mkdir(usbDriveName, mode);
-
-  /* Catenate the output file name */
-  strcat(usbDriveName, outFileName);
-
-  printf("writing %s \n", usbDriveName);
-
-  inFile = fopen(inFileName, "rb");
-  outFile = fopen(usbDriveName, "wb");
-
-  if( (inFile != NULL) && (outFile != NULL) ){
-    while( !feof(inFile) ){
-      data = fgetc(inFile);
-      fputc(data, outFile);
-    }
-  }
-
-  fclose(inFile);
-  fclose(outFile);
 
   return retVal;
 }
