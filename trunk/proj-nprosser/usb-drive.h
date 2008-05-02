@@ -18,7 +18,7 @@
  *  matter if any of these are not present, but if additional ones are present
  *  (eg a CD-ROM), that may be detected instead of the flash drive.
  */
-char *getUSBDriveName();
+void getUSBDriveName( char *fileName );
 
 /* unmountUSBDrive()
  * Unmounts the USB drive. This function uses the getUSBDriveName function to
@@ -38,11 +38,10 @@ int unmountUSBDrive();
  *  1 and increasing until an unused one is found.
  *  
  * Parameters:
- *  inFileName: the name of the file (in the current directory) to write
- *  outFileName: the name of the file to write (this will be on the USB
+ *  fileName: the name of the file (current directory or path) to write
  *
  * Returns 0 if successful, nonzero if an error occurred.
  */
-int writeFileToUSBDrive(char *inFileName, char *outFileName);
+int writeFileToUSBDrive(char *fileName);
 
 #endif
