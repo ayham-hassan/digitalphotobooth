@@ -227,6 +227,18 @@ void money_update (DigitalPhotoBooth *booth);
 void on_money_forward_button_clicked (GtkWidget *button,
     DigitalPhotoBooth *booth);
     
+/******************************************************************************
+ *
+ *  Function:       money_next
+ *  Description:    Function for moving to the next panel
+ *  Inputs:         booth - a pointer to the DigitalPhotoBooth struct
+ *  Outputs:        
+ *  Routines Called: gtk_notebook_next_page, open_camera, g_idle_add
+ *                  v42lCaptureStartStreaming
+ *
+ *****************************************************************************/
+void money_next (DigitalPhotoBooth *booth);
+    
 
 /* Functions for the second screen */
 

@@ -387,6 +387,12 @@ void money_update (DigitalPhotoBooth *booth)
         
         /* make the forward button available */
         gtk_widget_set_sensitive (booth->money_forward_button, TRUE);
+        
+        if (gtk_notebook_get_current_page ((GtkNotebook*)booth->wizard_panel)
+            == 0)            
+        {
+            money_next (booth);
+        }
     }
     else
     {
@@ -417,6 +423,21 @@ void money_update (DigitalPhotoBooth *booth)
  *****************************************************************************/
 void on_money_forward_button_clicked (GtkWidget *button,
     DigitalPhotoBooth *booth)
+{
+    money_next (booth);
+}
+
+/******************************************************************************
+ *
+ *  Function:       money_next
+ *  Description:    Function for moving to the next panel
+ *  Inputs:         booth - a pointer to the DigitalPhotoBooth struct
+ *  Outputs:        
+ *  Routines Called: gtk_notebook_next_page, open_camera, g_idle_add
+ *                  v42lCaptureStartStreaming
+ *
+ *****************************************************************************/
+void money_next (DigitalPhotoBooth *booth)
 {
     /* make sure camera is not already open and open if necessary */
     if (booth->capture == NULL)
