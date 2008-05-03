@@ -45,7 +45,7 @@ gboolean printImage(char * toPrint, GError *error)
  *  Routines Called: g_spawn_sync
  *
  *****************************************************************************/
-gboolean fs_sync(char * toPrint, GError *error)
+gboolean fs_sync(GError *error)
 {
 	/* Setup the argument strings. */
 	char cmd[5] = "sync";

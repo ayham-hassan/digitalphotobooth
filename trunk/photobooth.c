@@ -10,6 +10,7 @@
 #include <string.h>
 #include "proj-nprosser/frame.h"
 #include "proj-nprosser/cam.h"
+#include "proj-nprosser/usb-drive.h"
 #include "ImageManipulations.h"
 #include "FileHandler.h"
 #include "photobooth.h"
@@ -386,7 +387,6 @@ void money_update (DigitalPhotoBooth *booth)
         
         /* make the forward button available */
         gtk_widget_set_sensitive (booth->money_forward_button, TRUE);
-        gtk_button_enter((GtkButton*)booth->money_forward_button);
     }
     else
     {
@@ -744,11 +744,13 @@ void update_preview_image (DigitalPhotoBooth *booth)
 }
 
 /******************************************************************************
- * *  Function:       on_photo_select_forward_button_clicked
+ *
+ *  Function:       on_photo_select_forward_button_clicked
  *  Description:    Callback function for the photo_select_forward_button
  *  Inputs:         button - a pointer to the button object
  *                  booth - a pointer to the DigitalPhotoBooth struct
- *  Outputs:         *  Routines Called: gtk_notebook_next_page
+ *  Outputs:        
+ *  Routines Called: gtk_notebook_next_page
  *
  *****************************************************************************/
 void on_photo_select_forward_button_clicked (GtkWidget *button,
@@ -880,7 +882,8 @@ void on_preview_thumb3_button_clicked (GtkWidget *button,
  *  Function:       oilblob_complete
  *  Description:    Callback function for the oilblob process completion
  *  Inputs:         pid - the pid of the exiting process
- *                  status - the exit status of the process *                  booth - a pointer to the DigitalPhotoBooth struct
+ *                  status - the exit status of the process
+ *                  booth - a pointer to the DigitalPhotoBooth struct
  *  Outputs:        
  *  Routines Called: get_image_filename_pointer, image_resize,
  *                  gdk_pixbuf_new_from_file, gtk_image_set_from_pixbuf,
@@ -916,7 +919,8 @@ void oilblob_complete (GPid pid, gint status, DigitalPhotoBooth *booth )
  *  Function:       charcoal_complete
  *  Description:    Callback function for the charcoal process completion
  *  Inputs:         pid - the pid of the exiting process
- *                  status - the exit status of the process *                  booth - a pointer to the DigitalPhotoBooth struct
+ *                  status - the exit status of the process
+ *                  booth - a pointer to the DigitalPhotoBooth struct
  *  Outputs:        
  *  Routines Called: get_image_filename_pointer, image_resize,
  *                  gdk_pixbuf_new_from_file, gtk_image_set_from_pixbuf,
@@ -952,7 +956,8 @@ void charcoal_complete (GPid pid, gint status, DigitalPhotoBooth *booth)
  *  Function:       texture_complete
  *  Description:    Callback function for the texture process completion
  *  Inputs:         pid - the pid of the exiting process
- *                  status - the exit status of the process *                  booth - a pointer to the DigitalPhotoBooth struct
+ *                  status - the exit status of the process
+ *                  booth - a pointer to the DigitalPhotoBooth struct
  *  Outputs:        
  *  Routines Called: get_image_filename_pointer, image_resize,
  *                  gdk_pixbuf_new_from_file, gtk_image_set_from_pixbuf,
@@ -1269,18 +1274,23 @@ void on_delivery_forward_button_clicked (GtkWidget *button,
 {
     if (money_pay (booth->delivery_total_cost, booth))
     {
+        gchar *filename = get_image_filename_pointer
+            (booth->selected_image_index, booth->selected_effect_enum, FULL,
+            booth);
+        
         if (gtk_toggle_button_get_active 
             ((GtkToggleButton*)booth->delivery_usb_toggle))
         {
             /* call usb code */
             printf ("USB DELIVERY!\n");
+            writeFileToUSBDrive (filename);
+            fs_sync (NULL);
         }
         
         if (gtk_toggle_button_get_active 
             ((GtkToggleButton*)booth->delivery_print_toggle))
         {
             printf ("PRINTER DELIVERY!\n");
-            gchar *filename = get_image_filename_pointer (booth->selected_image_index, booth->selected_effect_enum, FULL, booth);
             printImage (filename, NULL);
         }
         
@@ -1340,5 +1350,21 @@ void on_finish_home_button_clicked (GtkWidget *button,
     DigitalPhotoBooth *booth)
 {
     gtk_notebook_set_current_page ((GtkNotebook*)booth->wizard_panel, 0);
+}
+
+/******************************************************************************
+ *
+ *  Function:       on_finish_back_button_clicked
+ *  Description:    Callback function for the finish_back_button
+ *  Inputs:         button - a pointer to the button object
+ *                  booth - a pointer to the DigitalPhotoBooth struct
+ *  Outputs:        
+ *  Routines Called: gtk_notebook_set_current_page
+ *
+ *****************************************************************************/
+void on_finish_back_button_clicked (GtkWidget *button,
+    DigitalPhotoBooth *booth)
+{
+    gtk_notebook_set_current_page ((GtkNotebook*)booth->wizard_panel, 2);
 }
 
