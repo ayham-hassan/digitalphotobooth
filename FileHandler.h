@@ -14,7 +14,18 @@
  *                  id - the ID of the spawned process
  *                  error - place to store error information 
  *  Outputs:       	TRUE on success, FALSE if error is set.
- *  Routines Called: g_spawn_async
+ *  Routines Called: g_spawn_sync
  *
  *****************************************************************************/
 gboolean printImage(char * toPrint, GError *error);
+
+ /******************************************************************************
+ *
+ *  Function:       fs_sync
+ *  Description:    This function will call the 'sync' unix command.  This 
+ *                  will cause the file system to sync pending writes.
+ *  Outputs:       	TRUE on success, FALSE if error is set.
+ *  Routines Called: g_spawn_sync
+ *
+ *****************************************************************************/
+gboolean fs_sync(char * toPrint, GError *error);
