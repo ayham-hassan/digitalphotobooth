@@ -176,13 +176,13 @@ void getUSBDriveName( char *fileName ){
  *  problem.
  */
 int unmountUSBDrive(){
-/*   pid_t mypid; */
-/*   char *driveName = getUSBDriveName(); */
-/*   char *arg */
+  /*   pid_t mypid; */
+  /*   char *driveName = getUSBDriveName(); */
+  /*   char *arg */
 
-/*   mypid = fork(); */
+  /*   mypid = fork(); */
 
-/*   if( !mypid ){ /\* Child process *\/ */
+  /*   if( !mypid ){ /\* Child process *\/ */
 
   printf("Drive unmounting not yet implemented. Remove at own risk!\n");
 
@@ -247,66 +247,71 @@ int writeFileToUSBDrive(char *fileName){
           dirExists ++;
         } /* if */
       }
-    } else {
-      fprintf(stderr, "Error: USB drive could not be read. \n");
-    } 
 
-    /* Close the directory listing */
-    closedir( usbDrive );
+      /* Close the directory listing */
+      closedir( usbDrive );
     
-    /* Catenate all the stuff together for the path to the output file */
-    strcat(usbDriveName, "/");
-    strcat(usbDriveName, dirname);
-    strcat(usbDriveName, "/");
+      /* Catenate all the stuff together for the path to the output file */
+      strcat(usbDriveName, "/");
+      strcat(usbDriveName, dirname);
+      strcat(usbDriveName, "/");
 
-    if( !dirExists ){
-      printf("mkdir making %s \n", usbDriveName);
+      if( !dirExists ){
+        printf("mkdir making %s \n", usbDriveName);
 
-      /* Make the directory on the USB drive */
-      retVal = mkdir(usbDriveName, mode);
-    } else {
-      printf("Directory already exists. \n");
+        /* Make the directory on the USB drive */
+        retVal = mkdir(usbDriveName, mode);
+      } else {
+        printf("Directory already exists. \n");
       
-      /* Check whether the default filename exists and adjust as necessary */
-      usbDrive = opendir( usbDriveName );
-      if( usbDrive != NULL ){
-        while( (ep = readdir( usbDrive )) ){
-          if( !strcmp( toUpperCase( ep->d_name ), outFileName ) ){
-            incrementFileName( outFileName, outFileName2 );
-            strncpy( outFileName, outFileName2, 11 );
-            rewinddir( usbDrive );
+        /* Check whether the default filename exists and adjust as necessary */
+        usbDrive = opendir( usbDriveName );
+        if( usbDrive != NULL ){
+          while( (ep = readdir( usbDrive )) ){
+            if( !strcmp( toUpperCase( ep->d_name ), outFileName ) ){
+              incrementFileName( outFileName, outFileName2 );
+              strncpy( outFileName, outFileName2, 11 );
+              rewinddir( usbDrive );
+            }
+          }
+        }
+        retVal = 0;
+      }
+
+      /* Catenate the output file name */
+      strcat(usbDriveName, outFileName);
+
+      printf("writing %s \n", usbDriveName);
+
+      inFile = fopen(fileName, "rb");
+      outFile = fopen(usbDriveName, "wb");
+
+      /* Copy the input file to the output file */
+      int errFlag = 0;
+      if( (inFile != NULL) && (outFile != NULL) ){
+        errFlag |= ferror(inFile);
+        errFlag |= ferror(outFile);
+        while( !feof(inFile) && !errFlag ){
+          errFlag = 0; /* This should be fresh every time */
+          data = fgetc(inFile);
+          errFlag = ferror(inFile);
+          if( !errFlag ){
+            fputc(data, outFile); 
+            errFlag |= ferror(outFile);
           }
         }
       }
-      retVal = 0;
-    }
 
-    /* Catenate the output file name */
-    strcat(usbDriveName, outFileName);
+      fclose(inFile);
+      fclose(outFile);
 
-    printf("writing %s \n", usbDriveName);
 
-    inFile = fopen(fileName, "rb");
-    outFile = fopen(usbDriveName, "wb");
+    } else {
+      retVal = -1;
+      fprintf(stderr, "Error: USB drive could not be read. \n");
+    } 
 
-    /* Copy the input file to the output file */
-    int errFlag = 0;
-    if( (inFile != NULL) && (outFile != NULL) ){
-      errFlag |= ferror(inFile);
-      errFlag |= ferror(outFile);
-      while( !feof(inFile) && !errFlag ){
-        errFlag = 0; /* This should be fresh every time */
-        data = fgetc(inFile);
-        errFlag = ferror(inFile);
-        if( !errFlag ){
-          fputc(data, outFile); 
-          errFlag |= ferror(outFile);
-        }
-      }
-    }
-
-    fclose(inFile);
-    fclose(outFile);
+    
   } /* end of chech for whether usb drive was found */
   else {
     retVal = -1;
