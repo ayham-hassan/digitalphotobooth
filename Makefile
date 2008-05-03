@@ -47,4 +47,5 @@ realclean: clean
 	
 install: all
 	$(INSTALL) photobooth $(bindir)/$(binprefix)photobooth
+	$(INSTALL) photobooth_start.sh $(bindir)/$(binprefix)photobooth_start
 	$(INSTALLDATA) -t $(datadir) photobooth.xml banner_image.jpg texture_fabric.gif

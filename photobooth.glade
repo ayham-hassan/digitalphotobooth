@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE glade-interface SYSTEM "glade-2.0.dtd">
-<!--Generated with glade3 3.4.0 on Tue Apr 29 18:22:25 2008 -->
+<!--Generated with glade3 3.4.0 on Sat May  3 02:16:28 2008 -->
 <glade-interface>
   <widget class="GtkWindow" id="window">
     <property name="width_request">1024</property>
@@ -289,7 +289,7 @@ The picture has not been captured until the progress bar leaves the screen.</pro
                                 <property name="height_request">120</property>
                                 <property name="visible">True</property>
                                 <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-                                <property name="stock">gtk-missing-image</property>
+                                <property name="stock">gtk-refresh</property>
                               </widget>
                             </child>
                           </widget>
@@ -313,7 +313,7 @@ The picture has not been captured until the progress bar leaves the screen.</pro
                                 <property name="height_request">120</property>
                                 <property name="visible">True</property>
                                 <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-                                <property name="stock">gtk-missing-image</property>
+                                <property name="stock">gtk-refresh</property>
                               </widget>
                             </child>
                           </widget>
@@ -337,7 +337,7 @@ The picture has not been captured until the progress bar leaves the screen.</pro
                                 <property name="height_request">120</property>
                                 <property name="visible">True</property>
                                 <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-                                <property name="stock">gtk-missing-image</property>
+                                <property name="stock">gtk-refresh</property>
                               </widget>
                             </child>
                           </widget>
@@ -381,7 +381,7 @@ The picture has not been captured until the progress bar leaves the screen.</pro
                             <property name="height_request">480</property>
                             <property name="visible">True</property>
                             <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-                            <property name="stock">gtk-missing-image</property>
+                            <property name="stock">gtk-refresh</property>
                           </widget>
                           <packing>
                             <property name="expand">False</property>
@@ -1016,7 +1016,7 @@ When the options are selected and the required money has been inserted, please t
                   </widget>
                 </child>
                 <child>
-                  <widget class="GtkButton" id="button1">
+                  <widget class="GtkButton" id="finish_back_button">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
@@ -1024,6 +1024,7 @@ When the options are selected and the required money has been inserted, please t
                     <property name="label" translatable="yes">gtk-go-back</property>
                     <property name="use_stock">True</property>
                     <property name="response_id">0</property>
+                    <signal name="clicked" handler="on_finish_back_button_clicked"/>
                   </widget>
                   <packing>
                     <property name="padding">5</property>
