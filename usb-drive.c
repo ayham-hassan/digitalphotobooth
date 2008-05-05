@@ -142,8 +142,6 @@ void getUSBDriveName( char *fileName ){
   struct dirent *ep;
   char *fn = 0;
 
-  printf("getUSBDriveName(): ");
-
   media = opendir( "/media" );
 
   /* List the files in /media and check whether each is an expected file */
@@ -162,8 +160,6 @@ void getUSBDriveName( char *fileName ){
     strcpy( fileName, "/media/" );
     strcat( fileName, fn );
   }
-
-  printf("%s \n", fileName);
   
   closedir(media);
 }
@@ -186,7 +182,7 @@ int unmountUSBDrive(){
 
   printf("Drive unmounting not yet implemented. Remove at own risk!\n");
 
-  return 0;
+  return -1;
 }
 
 /* writeFileToUSBDrive()
@@ -233,8 +229,6 @@ int writeFileToUSBDrive(char *fileName){
   /* User:RWX, Group:RWX, Other:RWX */
   mode_t mode = S_IRWXU | S_IRWXG | S_IRWXO;
 
-  printf("writeFileToUSBDrive(): ");
-
   if( usbDriveName != NULL ){ /* USB drive not detected by getUSBDriveName */
 
     /* Open the USB drive for listing */
@@ -257,13 +251,10 @@ int writeFileToUSBDrive(char *fileName){
       strcat(usbDriveName, "/");
 
       if( !dirExists ){
-        printf("mkdir making %s \n", usbDriveName);
 
         /* Make the directory on the USB drive */
         retVal = mkdir(usbDriveName, mode);
       } else {
-        printf("Directory already exists. \n");
-      
         /* Check whether the default filename exists and adjust as necessary */
         usbDrive = opendir( usbDriveName );
         if( usbDrive != NULL ){
@@ -280,8 +271,6 @@ int writeFileToUSBDrive(char *fileName){
 
       /* Catenate the output file name */
       strcat(usbDriveName, outFileName);
-
-      printf("writing %s \n", usbDriveName);
 
       inFile = fopen(fileName, "rb");
       outFile = fopen(usbDriveName, "wb");
@@ -308,14 +297,12 @@ int writeFileToUSBDrive(char *fileName){
 
     } else {
       retVal = -1;
-      fprintf(stderr, "Error: USB drive could not be read. \n");
     } 
 
     
   } /* end of chech for whether usb drive was found */
   else {
     retVal = -1;
-    fprintf(stderr, "Error: USB drive not found. \n");
   }
 
   return retVal;
