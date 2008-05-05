@@ -1831,6 +1831,16 @@ void finish_init (DigitalPhotoBooth *booth)
  *****************************************************************************/
 void finish_timer_start (DigitalPhotoBooth *booth)
 {
+    /* create a label string buffer */
+    gchar label[MAX_STRING_LENGTH];
+    
+    /* create the progress bar text */
+    g_sprintf (label, "Transfer in progress...");
+        
+    /* set the progress bar text with the buffer content */
+    gtk_progress_bar_set_text ((GtkProgressBar*)booth->finish_usb_progress,
+        label);
+    
     /* initialize the timer fields */
     booth->finish_timer_left = FINISH_USB_TIMER_SECONDS;
     
