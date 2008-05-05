@@ -17,7 +17,7 @@ CC=gcc
 CFLAGS=-c -Wall $(shell pkg-config gtk+-2.0 libglade-2.0 --cflags)
 LDFLAGS=-O2 -export-dynamic $(shell pkg-config gtk+-2.0 libglade-2.0 --libs)
 
-SOURCES=proj-nprosser/cam.c proj-nprosser/drv-v4l2.c proj-nprosser/frame.c proj-nprosser/yuv2rgb.c proj-nprosser/fourcc.c proj-nprosser/utils.c proj-nprosser/usb-drive.c ImageManipulations.c FileHandler.c photobooth.c
+SOURCES=camera/cam.c camera/drv-v4l2.c camera/frame.c camera/yuv2rgb.c camera/fourcc.c camera/utils.c usb-drive.c ImageManipulations.c FileHandler.c photobooth.c
 INCLUDE=/usr/lib/libjpeg.a
 OBJECTS=$(SOURCES:.c=.o)
 EXECUTABLE=photobooth
@@ -39,7 +39,7 @@ rebuild: realclean all
 
 clean:
 	rm -f *.o
-	rm -f proj-nprosser/*.o
+	rm -f camera/*.o
 
 realclean: clean
 	rm -f $(EXECUTABLE)
