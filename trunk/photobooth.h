@@ -26,10 +26,10 @@
 /* location of the texture file */
 #define TEXTURE_FILE DATA_DIR "texture_fabric.gif"
 
-#define TIMER_PHOTO_SECONDS 3
+#define TAKE_PHOTO_TIMER_SECONDS 3
+#define FINISH_USB_TIMER_SECONDS 5
+#define APP_TIMEOUT_SECONDS 120
 #define NUM_PHOTOS 3
-#define NUM_PHOTO_STYLES 4
-#define NUM_PHOTO_SIZES 3
 #define MAX_STRING_LENGTH 256
 
 enum PHOTO_STYLE
@@ -37,14 +37,16 @@ enum PHOTO_STYLE
     NONE,
     OILBLOB,
     CHARCOAL,
-    TEXTURE
+    TEXTURE,
+    NUM_PHOTO_STYLES
 };
 
 enum PHOTO_SIZE
 {
     FULL,
     SMALL,
-    LARGE
+    LARGE,
+    NUM_PHOTO_SIZES
 };
 
 typedef struct
@@ -55,6 +57,10 @@ typedef struct
     /* wizard panel */
     GtkWidget *wizard_panel;
     
+    /* app timeout */
+    gint app_timeout;
+    guint app_timeout_source;
+    
     /* first panel - welcome and coin acceptance */
     GtkWidget *money_message_label;
     GtkWidget *money_forward_button;
@@ -64,15 +70,14 @@ typedef struct
     
     /* second panel - streaming video */
     V4L2Capture *capture;
-    guint video_source_id;
+    guint take_photo_video_source;
     GtkWidget *videobox;
     GtkWidget *take_photo_button;
     GtkWidget *take_photo_progress;
     GtkWidget *take_photo_forward_button;
     guint num_photos_taken;
-    gint timer_left;
-    gint timer_total;
-    guint timer_source_id;
+    gint take_photo_timer_left;
+    guint take_photo_timer_source;
     
     /* third panel - photo selection */
     GtkWidget *preview_thumb1_image;
@@ -106,6 +111,7 @@ typedef struct
     GtkWidget *finish_print_frame;
     GtkWidget *finish_usb_progress;
     GtkWidget *finish_large_image;
+    gint finish_timer_left;
     
     /* filename variables */
     const gchar *tempdir;
@@ -164,6 +170,53 @@ void on_window_destroy (GtkObject *object, DigitalPhotoBooth *booth);
  *****************************************************************************/
 gboolean on_window_key_press_event (GtkWidget *window, GdkEventKey *event,
     DigitalPhotoBooth *booth);
+    
+    
+/* Functions for the app timeout */
+
+/******************************************************************************
+ *
+ *  Function:       app_timeout_init
+ *  Description:    Initialize the application timeout
+ *  Inputs:         booth - a pointer to the DigitalPhotoBooth struct
+ *  Outputs:        
+ *  Routines Called: g_idle_add
+ *
+ *****************************************************************************/
+void app_timeout_init (DigitalPhotoBooth *booth);
+
+/******************************************************************************
+ *
+ *  Function:       app_timeout_reset
+ *  Description:    Reset the application timeout to zero (a button was pushed)
+ *  Inputs:         booth - a pointer to the DigitalPhotoBooth struct
+ *  Outputs:        
+ *  Routines Called: 
+ *
+ *****************************************************************************/
+void app_timeout_reset (DigitalPhotoBooth *booth);
+
+/******************************************************************************
+ *
+ *  Function:       app_timeout_cleanup
+ *  Description:    Cleanup the application timeout
+ *  Inputs:         booth - a pointer to the DigitalPhotoBooth struct
+ *  Outputs:        
+ *  Routines Called: g_source_remove
+ *
+ *****************************************************************************/
+void app_timeout_cleanup (DigitalPhotoBooth *booth);
+
+/******************************************************************************
+ *
+ *  Function:       app_timeout_idle
+ *  Description:    Process the application timeout
+ *  Inputs:         booth - a pointer to the DigitalPhotoBooth struct
+ *  Outputs:        TRUE to schedule the task again, FALSE otherwise
+ *  Routines Called: take_photo_cleanup, gtk_notebook_set_current_page
+ *
+ *****************************************************************************/
+gboolean app_timeout_idle (DigitalPhotoBooth *booth);
 
 
 /* General utility functions */
@@ -259,6 +312,17 @@ void on_money_forward_button_clicked (GtkWidget *button,
  *
  *****************************************************************************/
 void take_photo_init (DigitalPhotoBooth *booth);
+
+/******************************************************************************
+ *
+ *  Function:       take_photo_clearnup
+ *  Description:    Clean up the take photo screen
+ *  Inputs:         booth - a pointer to the DigitalPhotoBooth struct
+ *  Outputs:        
+ *  Routines Called: g_source_remove, v4l2CaptureStopStreaming
+ *
+ *****************************************************************************/
+void take_photo_cleanup (DigitalPhotoBooth *booth);
 
 /******************************************************************************
  *
@@ -700,6 +764,29 @@ void on_delivery_print_toggle_toggled (GtkWidget *button,
  *
  *****************************************************************************/
 void finish_init (DigitalPhotoBooth *booth);
+
+/******************************************************************************
+ *
+ *  Function:       finish_timer_start
+ *  Description:    This function sets up and starts the usb transfer timer
+ *  Inputs:         booth - a pointer to the DigitalPhotoBooth struct
+ *  Outputs:        
+ *  Routines Called: gtk_progress_bar_set_fraction, g_timeout_add_seconds
+ *
+ *****************************************************************************/
+void finish_timer_start (DigitalPhotoBooth *booth);
+
+/******************************************************************************
+ *
+ *  Function:       finish_timer_process
+ *  Description:    Callback function which processes each timer tick
+ *  Inputs:         booth - a pointer to the DigitalPhotoBooth struct
+ *  Outputs:        TRUE to schedule the task again, FALSE otherwise
+ *  Routines Called: gtk_progress_bar_set_fraction, g_sprintf
+ *                  gtk_progress_bar_set_text
+ *
+ *****************************************************************************/
+gboolean finish_timer_process (DigitalPhotoBooth *booth);
 
 /******************************************************************************
  *
