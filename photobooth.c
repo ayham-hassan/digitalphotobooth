@@ -182,8 +182,8 @@ gboolean init_app (DigitalPhotoBooth *booth)
     booth->capture = NULL;
     
     /* set the source id fields to zero */
-    booth->video_source_id = 0;
-	booth->timer_source_id = 0;
+    booth->take_photo_video_source = 0;
+	booth->take_photo_timer_source = 0;
 	
 	/* initialize the user image options */
 	booth->selected_image_index = 0;
@@ -219,26 +219,17 @@ gboolean init_app (DigitalPhotoBooth *booth)
  *****************************************************************************/
 void on_window_destroy (GtkObject *object, DigitalPhotoBooth *booth)
 {
-    /* check if the video idle source still exists and remove if necessary */
-    if (booth->video_source_id != 0)
-    {
-        g_source_remove(booth->video_source_id);
-        booth->video_source_id = 0;
-    }
+    /* cleanup the camera */
+    take_photo_cleanup (booth);
 
-    /* check if the timer source still exists and remove if necessary */
-    if (booth->timer_source_id != 0)
-    {
-        g_source_remove(booth->timer_source_id);
-        booth->timer_source_id = 0;
-    }
-    
-    /* make sure the camera was open and close if necessary */
+    /* make sure the camera was open and close it */
     if (booth->capture != NULL)
     {
-        v4l2CaptureStopStreaming (booth->capture);
         close_camera (booth->capture);
     }
+    
+    /* cleanup the application timeout */
+    app_timeout_cleanup (booth);
     
     /* quit the main gtk loop */
     gtk_main_quit();
@@ -258,6 +249,9 @@ void on_window_destroy (GtkObject *object, DigitalPhotoBooth *booth)
 gboolean on_window_key_press_event (GtkWidget *window, GdkEventKey *event,
     DigitalPhotoBooth *booth)
 {
+    /* reset the application timeout */
+    app_timeout_reset (booth);
+    
     /* check if the 'f' key has been pressed (case-insensitive) */
     if (event->keyval == 102 || event->keyval == 70)
     {
@@ -279,6 +273,83 @@ gboolean on_window_key_press_event (GtkWidget *window, GdkEventKey *event,
 
     /* the event should propagate further */
     return FALSE;
+}
+
+
+/* functions for the app timeout */
+
+/******************************************************************************
+ *
+ *  Function:       app_timeout_init
+ *  Description:    Initialize the application timeout
+ *  Inputs:         booth - a pointer to the DigitalPhotoBooth struct
+ *  Outputs:        
+ *  Routines Called: g_idle_add
+ *
+ *****************************************************************************/
+void app_timeout_init (DigitalPhotoBooth *booth)
+{
+    booth->app_timeout = 0;
+    
+    booth->app_timeout_source =
+        g_timeout_add_seconds (1, (GSourceFunc)app_timeout_idle, booth);
+}
+
+/******************************************************************************
+ *
+ *  Function:       app_timeout_reset
+ *  Description:    Reset the application timeout to zero (a button was pushed)
+ *  Inputs:         booth - a pointer to the DigitalPhotoBooth struct
+ *  Outputs:        
+ *  Routines Called: 
+ *
+ *****************************************************************************/
+void app_timeout_reset (DigitalPhotoBooth *booth)
+{
+    booth->app_timeout = 0;
+}
+
+/******************************************************************************
+ *
+ *  Function:       app_timeout_cleanup
+ *  Description:    Cleanup the application timeout
+ *  Inputs:         booth - a pointer to the DigitalPhotoBooth struct
+ *  Outputs:        
+ *  Routines Called: g_source_remove
+ *
+ *****************************************************************************/
+void app_timeout_cleanup (DigitalPhotoBooth *booth)
+{
+    if (booth->app_timeout_source != 0) {
+        g_source_remove (booth->app_timeout_source);
+    }
+}
+
+/******************************************************************************
+ *
+ *  Function:       app_timeout_idle
+ *  Description:    Process the application timeout
+ *  Inputs:         booth - a pointer to the DigitalPhotoBooth struct
+ *  Outputs:        TRUE to schedule the task again, FALSE otherwise
+ *  Routines Called: take_photo_cleanup, gtk_notebook_set_current_page
+ *
+ *****************************************************************************/
+gboolean app_timeout_idle (DigitalPhotoBooth *booth)
+{
+    if (++booth->app_timeout < APP_TIMEOUT_SECONDS)
+    {
+        return TRUE;
+    }
+    else
+    {
+        booth->app_timeout = 0;
+        
+        take_photo_cleanup (booth);
+        
+        gtk_notebook_set_current_page ((GtkNotebook*)booth->wizard_panel, 0);
+        
+        return FALSE;
+    }
 }
 
 
@@ -435,6 +506,10 @@ void money_update (DigitalPhotoBooth *booth)
  *****************************************************************************/
 void money_next (DigitalPhotoBooth *booth)
 {
+    /* initialize the application timeout */
+    app_timeout_init (booth);
+
+    /* initialize the take photo screen */
     take_photo_init (booth);
     
     /* switch to the next wizard page */
@@ -488,7 +563,7 @@ void take_photo_init (DigitalPhotoBooth *booth)
     booth->num_photos_taken = 0;
 	
 	/* start a idle source which updates the drawing area */
-    booth->video_source_id = g_idle_add
+    booth->take_photo_video_source = g_idle_add
         ((GSourceFunc)take_photo_live_feed_idle, booth);
 }
 
@@ -498,12 +573,30 @@ void take_photo_init (DigitalPhotoBooth *booth)
  *  Description:    Clean up the take photo screen
  *  Inputs:         booth - a pointer to the DigitalPhotoBooth struct
  *  Outputs:        
- *  Routines Called: 
+ *  Routines Called: g_source_remove, v4l2CaptureStopStreaming
  *
  *****************************************************************************/
 void take_photo_cleanup (DigitalPhotoBooth *booth)
 {
+    /* check if the video idle source still exists and remove if necessary */
+    if (booth->take_photo_video_source != 0)
+    {
+        g_source_remove(booth->take_photo_video_source);
+        booth->take_photo_video_source = 0;
+    }
+
+    /* check if the timer source still exists and remove if necessary */
+    if (booth->take_photo_timer_source != 0)
+    {
+        g_source_remove(booth->take_photo_timer_source);
+        booth->take_photo_timer_source = 0;
+    }
     
+    /* make sure the camera was open and stop streaming */
+    if (booth->capture != NULL)
+    {
+        v4l2CaptureStopStreaming (booth->capture);
+    }
 }
 
 /******************************************************************************
@@ -576,6 +669,9 @@ gboolean take_photo_live_feed_idle (DigitalPhotoBooth *booth)
  *****************************************************************************/
 gboolean take_photo_process (DigitalPhotoBooth *booth)
 {
+    /* reset the application timeout */
+    app_timeout_reset (booth);
+
     /* make sure a capture object exists */
     if (booth->capture != NULL)
     {
@@ -606,7 +702,7 @@ gboolean take_photo_process (DigitalPhotoBooth *booth)
         if (++booth->num_photos_taken < NUM_PHOTOS)
         {
             /* create an idle source which updates the drawing area */
-            booth->video_source_id = g_idle_add
+            booth->take_photo_video_source = g_idle_add
                 ((GSourceFunc)take_photo_live_feed_idle, booth);
             
             /* start another countdown timer */
@@ -652,8 +748,7 @@ void take_photo_timer_start (DigitalPhotoBooth *booth)
     gchar label[MAX_STRING_LENGTH];
 
     /* initialize the timer fields */
-    booth->timer_left = TIMER_PHOTO_SECONDS;
-    booth->timer_total = TIMER_PHOTO_SECONDS;
+    booth->take_photo_timer_left = TAKE_PHOTO_TIMER_SECONDS;
     
     /* set the initial state of the progress bar */
     gtk_progress_bar_set_fraction ((GtkProgressBar*)booth->take_photo_progress,
@@ -661,14 +756,14 @@ void take_photo_timer_start (DigitalPhotoBooth *booth)
 
     /* create the progress bar text */
     g_sprintf (label, "The photo will be taken in %d seconds",
-        booth->timer_left);
+        booth->take_photo_timer_left);
         
     /* set the progress bar text with the buffer content */
     gtk_progress_bar_set_text ((GtkProgressBar*)booth->take_photo_progress,
         label);
     
     /* add a timeout source which fires every second */
-    booth->timer_source_id = g_timeout_add_seconds (1,
+    booth->take_photo_timer_source = g_timeout_add_seconds (1,
         (GSourceFunc)take_photo_timer_process, booth);
 }
 
@@ -688,16 +783,17 @@ gboolean take_photo_timer_process (DigitalPhotoBooth *booth)
     gchar label[MAX_STRING_LENGTH];
     
     /* set the progress bar to the current time left */
-    double progress = --booth->timer_left / (double)booth->timer_total;
+    double progress = --booth->take_photo_timer_left / (double)TAKE_PHOTO_TIMER_SECONDS;
+
     gtk_progress_bar_set_fraction ((GtkProgressBar*)booth->take_photo_progress,
         progress );
 
     /* if the timer hasn't expired, continue the timeout schedule */
-    if (booth->timer_left > 0)
+    if (booth->take_photo_timer_left > 0)
     {
         /* create the progress bar text */
         g_sprintf (label, "The photo will be taken in %d seconds",
-            booth->timer_left);
+            booth->take_photo_timer_left);
             
         /* set the progress bar text with the buffer content */
         gtk_progress_bar_set_text ((GtkProgressBar*)booth->take_photo_progress,
@@ -716,10 +812,10 @@ gboolean take_photo_timer_process (DigitalPhotoBooth *booth)
             label);
 
         /* stop the video from updating */
-        if (booth->video_source_id != 0)
+        if (booth->take_photo_video_source != 0)
         {
-            g_source_remove(booth->video_source_id);
-            booth->video_source_id = 0;
+            g_source_remove(booth->take_photo_video_source);
+            booth->take_photo_video_source = 0;
         }
       
         /* add an idle function to take the photo (allow the GUI to update) */
@@ -742,6 +838,9 @@ gboolean take_photo_timer_process (DigitalPhotoBooth *booth)
  *****************************************************************************/
 void on_take_photo_button_clicked (GtkWidget *button, DigitalPhotoBooth *booth)
 {
+    /* reset the application timeout */
+    app_timeout_reset (booth);
+    
     /* hide the take photo button and show the progress bar */
     gtk_widget_hide (booth->take_photo_button);
     gtk_widget_show (booth->take_photo_progress);
@@ -835,6 +934,9 @@ void preview_update_image (DigitalPhotoBooth *booth)
 void on_preview_forward_button_clicked (GtkWidget *button,
     DigitalPhotoBooth *booth)
 {
+    /* reset the application timeout */
+    app_timeout_reset (booth);
+
     /* initialize the fourth screen */
     effects_init (booth);
 
@@ -855,6 +957,9 @@ void on_preview_forward_button_clicked (GtkWidget *button,
 void on_preview_back_button_clicked (GtkWidget *button,
     DigitalPhotoBooth *booth)
 {
+    /* reset the application timeout */
+    app_timeout_reset (booth);
+
     /* initialize the fourth screen */
     take_photo_init (booth);
 
@@ -875,6 +980,9 @@ void on_preview_back_button_clicked (GtkWidget *button,
 void on_preview_thumb1_button_clicked (GtkWidget *button,
     DigitalPhotoBooth *booth)
 {
+    /* reset the application timeout */
+    app_timeout_reset (booth);
+
     /* set the current index value to 0 */
     booth->selected_image_index = 0;
     
@@ -895,6 +1003,9 @@ void on_preview_thumb1_button_clicked (GtkWidget *button,
 void on_preview_thumb2_button_clicked (GtkWidget *button,
     DigitalPhotoBooth *booth)
 {
+    /* reset the application timeout */
+    app_timeout_reset (booth);
+
     /* set the current index value to 1 */
     booth->selected_image_index = 1;
     
@@ -915,6 +1026,9 @@ void on_preview_thumb2_button_clicked (GtkWidget *button,
 void on_preview_thumb3_button_clicked (GtkWidget *button,
     DigitalPhotoBooth *booth)
 {
+    /* reset the application timeout */
+    app_timeout_reset (booth);
+    
     /* set the current index value to 2 */
     booth->selected_image_index = 2;
     
@@ -1059,6 +1173,9 @@ gboolean effects_init_idle (DigitalPhotoBooth *booth)
  *****************************************************************************/
 void effects_oilblob_complete (GPid pid, gint status, DigitalPhotoBooth *booth)
 {
+    /* reset the application timeout */
+    app_timeout_reset (booth);
+
     if (gtk_notebook_get_current_page ((GtkNotebook*)booth->wizard_panel) >= 3)
     {
         /* get a pointer to each of the image filenames */
@@ -1100,6 +1217,9 @@ void effects_oilblob_complete (GPid pid, gint status, DigitalPhotoBooth *booth)
 void effects_charcoal_complete (GPid pid, gint status, 
     DigitalPhotoBooth *booth)
 {
+    /* reset the application timeout */
+    app_timeout_reset (booth);
+
     if (gtk_notebook_get_current_page ((GtkNotebook*)booth->wizard_panel) >= 3)
     {
         /* get a pointer to each of the image filenames */
@@ -1140,6 +1260,9 @@ void effects_charcoal_complete (GPid pid, gint status,
  *****************************************************************************/
 void effects_texture_complete (GPid pid, gint status, DigitalPhotoBooth *booth)
 {
+    /* reset the application timeout */
+    app_timeout_reset (booth);
+
     if (gtk_notebook_get_current_page ((GtkNotebook*)booth->wizard_panel) >= 3)
     {
         /* get a pointer to each of the image filenames */
@@ -1204,6 +1327,9 @@ void effects_update_image (DigitalPhotoBooth *booth)
 void on_effects_forward_button_clicked (GtkWidget *button,
     DigitalPhotoBooth *booth)
 {
+    /* reset the application timeout */
+    app_timeout_reset (booth);
+
     /* initialize the delivery screen */
     delivery_init (booth);
     
@@ -1224,6 +1350,9 @@ void on_effects_forward_button_clicked (GtkWidget *button,
 void on_effects_back_button_clicked (GtkWidget *button,
     DigitalPhotoBooth *booth)
 {
+    /* reset the application timeout */
+    app_timeout_reset (booth);
+
     /* initialize the preview screen */
     preview_init (booth);
     
@@ -1244,6 +1373,9 @@ void on_effects_back_button_clicked (GtkWidget *button,
 void on_effects_thumb1_button_clicked (GtkWidget *button,
     DigitalPhotoBooth *booth)
 {
+    /* reset the application timeout */
+    app_timeout_reset (booth);
+
     /* set the effect type to OILBLOB */
     booth->selected_effect_enum = OILBLOB;
     
@@ -1264,6 +1396,9 @@ void on_effects_thumb1_button_clicked (GtkWidget *button,
 void on_effects_thumb2_button_clicked (GtkWidget *button,
     DigitalPhotoBooth *booth)
 {
+    /* reset the application timeout */
+    app_timeout_reset (booth);
+
     /* set the effect type to CHARCOAL */
     booth->selected_effect_enum = CHARCOAL;
     
@@ -1284,6 +1419,9 @@ void on_effects_thumb2_button_clicked (GtkWidget *button,
 void on_effects_thumb3_button_clicked (GtkWidget *button,
     DigitalPhotoBooth *booth)
 {
+    /* reset the application timeout */
+    app_timeout_reset (booth);
+
     /* set the effect type to TEXTURE */
     booth->selected_effect_enum = TEXTURE;
     
@@ -1304,6 +1442,9 @@ void on_effects_thumb3_button_clicked (GtkWidget *button,
 void on_effects_none_button_clicked (GtkWidget *button,
     DigitalPhotoBooth *booth)
 {
+    /* reset the application timeout */
+    app_timeout_reset (booth);
+
     /* set the effect type to NONE */
     booth->selected_effect_enum = NONE;
     
@@ -1493,6 +1634,9 @@ void delivery_update (DigitalPhotoBooth *booth)
 void on_delivery_forward_button_clicked (GtkWidget *button,
     DigitalPhotoBooth *booth)
 {
+    /* reset the application timeout */
+    app_timeout_reset (booth);
+
     if (money_pay (booth->delivery_total_cost, booth))
     {
         gchar *filename = get_image_filename_pointer
@@ -1536,6 +1680,9 @@ void on_delivery_forward_button_clicked (GtkWidget *button,
 void on_delivery_back_button_clicked (GtkWidget *button,
     DigitalPhotoBooth *booth)
 {
+    /* reset the application timeout */
+    app_timeout_reset (booth);
+    
     gtk_notebook_prev_page ((GtkNotebook*)booth->wizard_panel);
 }
 
@@ -1552,6 +1699,9 @@ void on_delivery_back_button_clicked (GtkWidget *button,
 void on_delivery_usb_toggle_toggled (GtkWidget *button,
     DigitalPhotoBooth *booth)
 {
+    /* reset the application timeout */
+    app_timeout_reset (booth);
+    
     delivery_update (booth);
 }
 
@@ -1568,6 +1718,9 @@ void on_delivery_usb_toggle_toggled (GtkWidget *button,
 void on_delivery_print_toggle_toggled (GtkWidget *button,
     DigitalPhotoBooth *booth)
 {
+    /* reset the application timeout */
+    app_timeout_reset (booth);
+
     delivery_update (booth);
 }
 
@@ -1589,6 +1742,7 @@ void finish_init (DigitalPhotoBooth *booth)
     if (booth->delivery_usb)
     {
         gtk_widget_show (booth->finish_usb_frame);
+        finish_timer_start (booth);
     }
     else
     {
@@ -1618,6 +1772,71 @@ void finish_init (DigitalPhotoBooth *booth)
 
 /******************************************************************************
  *
+ *  Function:       finish_timer_start
+ *  Description:    This function sets up and starts the usb transfer timer
+ *  Inputs:         booth - a pointer to the DigitalPhotoBooth struct
+ *  Outputs:        
+ *  Routines Called: gtk_progress_bar_set_fraction, g_timeout_add_seconds
+ *
+ *****************************************************************************/
+void finish_timer_start (DigitalPhotoBooth *booth)
+{
+    /* initialize the timer fields */
+    booth->finish_timer_left = FINISH_USB_TIMER_SECONDS;
+    
+    /* set the initial state of the progress bar */
+    gtk_progress_bar_set_fraction ((GtkProgressBar*)booth->finish_usb_progress,
+        0.0 );
+    
+    /* add a timeout source which fires every second */
+    g_timeout_add_seconds (1, (GSourceFunc)finish_timer_process, booth);
+}
+
+/******************************************************************************
+ *
+ *  Function:       finish_timer_process
+ *  Description:    Callback function which processes each timer tick
+ *  Inputs:         booth - a pointer to the DigitalPhotoBooth struct
+ *  Outputs:        TRUE to schedule the task again, FALSE otherwise
+ *  Routines Called: gtk_progress_bar_set_fraction, g_sprintf
+ *                  gtk_progress_bar_set_text
+ *
+ *****************************************************************************/
+gboolean finish_timer_process (DigitalPhotoBooth *booth)
+{
+    /* create a label string buffer */
+    gchar label[MAX_STRING_LENGTH];
+    
+    /* set the progress bar to the current time left */
+    double progress =
+        (FINISH_USB_TIMER_SECONDS - (--booth->finish_timer_left))
+        / (double)FINISH_USB_TIMER_SECONDS;
+
+    gtk_progress_bar_set_fraction ((GtkProgressBar*)booth->finish_usb_progress,
+        progress );
+
+    /* if the timer hasn't expired, continue the timeout schedule */
+    if (booth->finish_timer_left > 0)
+    {
+        /* return true to schedule the task again */
+        return TRUE;
+    }
+    else
+    {
+        /* create the progress bar text */
+        g_sprintf (label, "Transfer complete.");
+            
+        /* set the progress bar text with the buffer content */
+        gtk_progress_bar_set_text ((GtkProgressBar*)booth->finish_usb_progress,
+            label);
+
+        /* remove the source from the schedule */
+        return FALSE;
+    }
+}
+
+/******************************************************************************
+ *
  *  Function:       on_finish_home_button_clicked
  *  Description:    Callback function for the finish_home_button
  *  Inputs:         button - a pointer to the button object
@@ -1629,6 +1848,9 @@ void finish_init (DigitalPhotoBooth *booth)
 void on_finish_home_button_clicked (GtkWidget *button,
     DigitalPhotoBooth *booth)
 {
+    /* reset the application timeout */
+    app_timeout_cleanup (booth);
+
     gtk_notebook_set_current_page ((GtkNotebook*)booth->wizard_panel, 0);
 }
 
@@ -1645,6 +1867,9 @@ void on_finish_home_button_clicked (GtkWidget *button,
 void on_finish_back_button_clicked (GtkWidget *button,
     DigitalPhotoBooth *booth)
 {
+    /* reset the application timeout */
+    app_timeout_reset (booth);
+
     gtk_notebook_set_current_page ((GtkNotebook*)booth->wizard_panel, 2);
 }
 
