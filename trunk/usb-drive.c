@@ -138,9 +138,9 @@ static void incrementFileName( char *inFileName, char *outFileName ){
  * If a usb device is not found, a null pointer is returned.
  */
 void getUSBDriveName( char *fileName ){
-  DIR *media;
-  struct dirent *ep;
-  char *fn = 0;
+  DIR *media = NULL;
+  struct dirent *ep = NULL;
+  char *fn = NULL;
 
   media = opendir( "/media" );
 
@@ -202,7 +202,8 @@ int unmountUSBDrive(){
  */
 int writeFileToUSBDrive(char *fileName){
   /* The USB drive mount point */
-  char usbDriveName[ 100 ] = "";
+  char usbDriveName[ 100 ];
+  memset( usbDriveName, 0, 100 );
   getUSBDriveName( usbDriveName );
 
   /* Stuff having to do with searching through directories */

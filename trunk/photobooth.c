@@ -483,13 +483,17 @@ void money_update (DigitalPhotoBooth *booth)
     
     /* update the display text */
     g_sprintf (label, 
-        "<big><b>%d Quarters Inserted\nPlease insert %d more quarters to continue\n\n",
+        "<big><b>%d Quarters Inserted\nPlease insert %d more quarters to",
         booth->money_inserted, remaining);
-    
+        
     /* concatenate the display text */
     g_sprintf (strchr (label, 0),
-        "Delivery Costs:\nUSB Thumbdrive: %d Quarters\nPrinter: %d Quarters</b></big>",
-        booth->usb_cost, booth->print_cost);
+        " continue\n\nDelivery Costs:\nUSB Thumbdrive: %d Quarters\n",
+        booth->usb_cost);
+    
+    /* concatenate the display text */
+    g_sprintf (strchr (label, 0), "Printer: %d Quarters</b></big>",
+        booth->print_cost);
 
     /* update the textual display */
     gtk_label_set_markup ((GtkLabel*)booth->money_message_label, label);
@@ -687,9 +691,12 @@ gboolean take_photo_process (DigitalPhotoBooth *booth)
             booth);
 
         /* create the image filenames */
-        g_sprintf (filename, "%s/img%04d.jpg", booth->tempdir, booth->num_photos_taken);
-        g_sprintf (filename_sm, "%s/img%04d_sm.jpg", booth->tempdir, booth->num_photos_taken);
-        g_sprintf (filename_lg, "%s/img%04d_lg.jpg", booth->tempdir, booth->num_photos_taken);
+        g_sprintf (filename, "%s/img%04d.jpg", booth->tempdir,
+            booth->num_photos_taken);
+        g_sprintf (filename_sm, "%s/img%04d_sm.jpg", booth->tempdir,
+            booth->num_photos_taken);
+        g_sprintf (filename_lg, "%s/img%04d_lg.jpg", booth->tempdir,
+            booth->num_photos_taken);
         
         /* capture a frame and convert it to jpg */
         capture_hr_jpg (booth->capture, filename, 85);
@@ -783,7 +790,8 @@ gboolean take_photo_timer_process (DigitalPhotoBooth *booth)
     gchar label[MAX_STRING_LENGTH];
     
     /* set the progress bar to the current time left */
-    double progress = --booth->take_photo_timer_left / (double)TAKE_PHOTO_TIMER_SECONDS;
+    double progress = --booth->take_photo_timer_left
+        / (double)TAKE_PHOTO_TIMER_SECONDS;
 
     gtk_progress_bar_set_fraction ((GtkProgressBar*)booth->take_photo_progress,
         progress );
@@ -1477,6 +1485,13 @@ void delivery_init (DigitalPhotoBooth *booth)
         ((GtkToggleButton*)booth->delivery_usb_toggle, FALSE);
     gtk_toggle_button_set_active
         ((GtkToggleButton*)booth->delivery_print_toggle, FALSE);
+        
+    /* default the usb drive toggle to be insensitive */
+    gtk_widget_set_sensitive (booth->delivery_usb_toggle, FALSE);
+    
+    /* add the idle callback to wait for the USB drive to be present */
+    booth->delivery_usb_source =
+        g_idle_add ((GSourceFunc)delivery_usb_poll, booth);
     
     /* make sure the delivery screen is updated */
     delivery_update (booth);
@@ -1493,6 +1508,41 @@ void delivery_init (DigitalPhotoBooth *booth)
     /* set the image to the pixbuf content */
     gtk_image_set_from_pixbuf ((GtkImage*)booth->delivery_large_image,
         delivery_pixbuf);
+}
+
+/******************************************************************************
+ *
+ *  Function:       delivery_usb_poll
+ *  Description:    Callback function which checks whether the USB thumbdrive
+ *                  is present.
+ *  Inputs:         booth - a pointer to the DigitalPhotoBooth struct
+ *  Outputs:        TRUE to schedule the task again, FALSE otherwise
+ *  Routines Called: getUSBDrive, memset, gtk_widget_set_sensitive
+ *
+ *****************************************************************************/
+gboolean delivery_usb_poll (DigitalPhotoBooth *booth)
+{
+    /* create and initialize a string */
+    char filename[MAX_STRING_LENGTH];
+    memset (filename, 0, MAX_STRING_LENGTH);
+    
+    /* get the name of the usb drive, does not modify the string if none */
+    getUSBDriveName (filename);
+    
+    /* see if the string is still zero length */
+    if (filename[0] == 0)
+    {
+        /* make the usb option unclickable */
+        gtk_widget_set_sensitive (booth->delivery_usb_toggle, FALSE);
+    }
+    else
+    {
+        /* make the usb option clickable */
+        gtk_widget_set_sensitive (booth->delivery_usb_toggle, TRUE);
+    }
+    
+    /* reschedule until manually removed */
+    return TRUE;
 }
 
 /******************************************************************************
@@ -1538,14 +1588,14 @@ void delivery_update (DigitalPhotoBooth *booth)
     gchar label[MAX_STRING_LENGTH];
     
     /* create the button label for usb delivery */
-    g_sprintf (label, "Send to Thumb Drive\nCost: %d Additional Quarters",
+    g_sprintf (label, "Send to Thumb Drive\n\nCost: %d Additional\nQuarters",
         delivery_required (booth->usb_cost, booth));
     
     /* set the button label to the string buffer content */
     gtk_button_set_label ((GtkButton*)booth->delivery_usb_toggle, label);
     
     /* create the button label for print delivery */
-    g_sprintf (label, "Send to Printer\nCost: %d Additional Quarters",
+    g_sprintf (label, "Send to Printer\n\nCost: %d Additional\nQuarters",
         delivery_required (booth->print_cost, booth));
     
     /* set the button label to the string buffer content */
@@ -1648,7 +1698,6 @@ void on_delivery_forward_button_clicked (GtkWidget *button,
         {
             booth->delivery_usb = TRUE;
             /* call usb code */
-            printf ("USB DELIVERY!\n");
             writeFileToUSBDrive (filename);
             fs_sync (NULL);
         }
@@ -1657,9 +1706,10 @@ void on_delivery_forward_button_clicked (GtkWidget *button,
             ((GtkToggleButton*)booth->delivery_print_toggle))
         {
             booth->delivery_print = TRUE;
-            printf ("PRINTER DELIVERY!\n");
             printImage (filename, NULL);
         }
+
+        g_source_remove (booth->delivery_usb_source);
         
         finish_init (booth);
         
