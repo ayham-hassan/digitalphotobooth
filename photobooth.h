@@ -105,6 +105,7 @@ typedef struct
     gint delivery_total_cost;
     gboolean delivery_usb;
     gboolean delivery_print;
+    guint delivery_usb_source;
     
     /* sixth panel - finish */
     GtkWidget *finish_usb_frame;
@@ -673,6 +674,18 @@ void on_effects_none_button_clicked (GtkWidget *button,
  *
  *****************************************************************************/
 void delivery_init (DigitalPhotoBooth *booth);
+
+/******************************************************************************
+ *
+ *  Function:       delivery_usb_poll
+ *  Description:    Callback function which checks whether the USB thumbdrive
+ *                  is present.
+ *  Inputs:         booth - a pointer to the DigitalPhotoBooth struct
+ *  Outputs:        TRUE to schedule the task again, FALSE otherwise
+ *  Routines Called: getUSBDrive, memset, gtk_widget_set_sensitive
+ *
+ *****************************************************************************/
+gboolean delivery_usb_poll (DigitalPhotoBooth *booth);
 
 /******************************************************************************
  *
