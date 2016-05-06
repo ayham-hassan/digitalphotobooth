@@ -1,0 +1,1 @@
+A photobooth kiosk application built to run on Linux using GTK+ and Video4Linux.
